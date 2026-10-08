@@ -1,0 +1,27 @@
+# secrets: never commit
+.env
+.env.*
+!.env.example
+*.pem
+.seed/
+leash-seal.json
+
+# local databases and build output
+*.db
+*.db-wal
+*.db-shm
+node_modules/
+dist/
+web/dist/
+
+# editor and OS
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# local notes
+paypal video transcript.txt
+
+# seed logs
+.seed-wallet.log

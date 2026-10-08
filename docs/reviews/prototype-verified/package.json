@@ -1,0 +1,1 @@
+{"name":"leash-prototype-verified","private":true,"type":"module","scripts":{"test":"node --disable-warning=ExperimentalWarning --test --test-reporter=spec leash.test.mjs hook.test.mjs fixes.test.mjs proxy.test.mjs realevents.test.mjs"},"dependencies":{"better-sqlite3":"*","@modelcontextprotocol/sdk":"*","zod":"*"}}

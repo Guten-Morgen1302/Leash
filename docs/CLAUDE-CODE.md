@@ -1,0 +1,60 @@
+# Using Leash with Claude Code and the PayPal AI Toolkit (draft; verify items marked CONFIRM against your live session)
+
+Sandbox only. Pin the toolkit versions you tested (agent-toolkit commit a3aa963, plugin 1.2.0 as of 2026-10-07): behavior can change between versions.
+
+## 1. Install
+1. Install the PayPal AI Toolkit plugin in Claude Code and set the sandbox token as the toolkit README describes. Fully quit and reopen Claude Code.
+2. Start Leash: `npm run demo` (service on a loopback port; prints the URL).
+3. Add the hooks below to the project's `.claude/settings.json`. **Use absolute paths.** A relative path breaks when the working directory changes, and a hook that does not run fails OPEN (the call proceeds unchecked).
+4. Run `npm run doctor`. It checks that the hooks are configured, the matcher covers the PayPal tools, the paths are absolute, the scripts exist, and that a deliberately over-cap sample refund is actually blocked. **Do not trust the setup until doctor passes.**
+
+## 2. Hook configuration (CONFIRM the tool-name prefix with your live tool list)
+```json
+{
+  "hooks": {
+    "PreToolUse": [
+      { "matcher": "mcp__plugin_paypal_paypal-sandbox__.*",
+        "hooks": [{ "type": "command", "command": "node \"C:/abs/path/leash/hooks/leash-hook.mjs\" pre", "timeout": 5 }] },
+      { "matcher": "Bash|PowerShell|Write|Edit|MultiEdit|NotebookEdit|Read",
+        "hooks": [{ "type": "command", "command": "node \"C:/abs/path/leash/hooks/guard.mjs\"", "timeout": 5 }] }
+    ],
+    "PostToolUse": [
+      { "matcher": "mcp__plugin_paypal_paypal-sandbox__.*",
+        "hooks": [{ "type": "command", "command": "node \"C:/abs/path/leash/hooks/leash-hook.mjs\" post", "timeout": 5 }] }
+    ],
+    "PostToolUseFailure": [
+      { "matcher": "mcp__plugin_paypal_paypal-sandbox__.*",
+        "hooks": [{ "type": "command", "command": "node \"C:/abs/path/leash/hooks/leash-hook.mjs\" failure", "timeout": 5 }] }
+    ]
+  }
+}
+```
+Verified against real Claude Code 2.1.278 (stand-in MCP server): exit 2 blocks the tool call, PostToolUse carries the same `tool_use_id`, and an MCP `tool_response` is an array of content blocks (the PayPal JSON is inside escaped text), which the hook parses. A blocked call produces no PostToolUse event. Plugin-provided PayPal tools may be named `mcp__plugin_<plugin>_<server>__<tool>`; use the matcher `mcp__.*paypal.*` to cover both forms.
+
+Why three events: `PostToolUse` fires only when the tool succeeded; `PostToolUseFailure` reports failures. Both feed Leash so a failed refund releases its reservation and a silent one becomes `unknown_outcome` (still counted against every cap).
+
+## 3. What each hook does
+- **leash-hook (pre):** reads the PayPal tool call, asks the Leash service, and returns allow (exit 0 with a JSON decision) or block (exit 2 with the reason on stderr). **Every failure path exits 2** (service down, hung service via a watchdog, bad input, crash).
+- **guard:** best-effort block of the easy bypasses: shell commands that use PayPal API hosts or the token variables, and edits or reads of hook settings, the mandate, `.env` and seed files.
+
+## 3b. Proxy mode (credential custody: the strong setup)
+Instead of giving the agent PayPal's MCP server and token, give it **Leash's proxy**. The proxy is an MCP server that holds the PayPal token itself; the agent has no token to misuse, leak or use from a shell. Tested (prototype, real MCP over stdio against a mock PayPal): allowed refunds reach PayPal with the proxy-held token and a `PayPal-Request-Id`; blocked and escalated refunds never reach PayPal; a PayPal error never leaks the token to the agent.
+```json
+{ "mcpServers": { "leash-paypal": { "command": "node", "args": ["C:/abs/path/leash/server/proxy-main.mjs"],
+    "env": { "PAYPAL_ACCESS_TOKEN": "<set in the proxy launcher or your secret store, NOT in the agent's settings>", "LEASH_DB": "C:/abs/path/leash/leash.db", "LEASH_MANDATE_JSON": "<contents of mandate.json>" } } } }
+```
+Caveat you must act on: in Claude Code the `env` above is visible to anyone who can read that settings file. For real custody, launch the proxy from a separate process or a secret store the agent cannot read, and do NOT also install PayPal's own MCP plugin with the token (that reopens the bypass). The guard hook still blocks reads of `.env` and settings.
+The proxy offers only `create_refund` and `get_refund`; other PayPal tools (`send_invoice`, `accept_dispute_claim`, ...) do not exist for the agent (fail closed by omission). Adding them means adding mapped, gated tools.
+
+## 3c. Verified facts about PayPal's tools (real runs, 2026-10-07/08)
+- The plugin's tool is `mcp__plugin_paypal_paypal-sandbox__create_refund`; the matcher `mcp__.*paypal.*` covers it and any server you name with "paypal".
+- **PayPal's hosted `create_refund` returned a server-side error in our run** (`PAYPAL_API_SETUP_ERROR: Unsupported cache mode: default`). Prefer PayPal's **local** `@paypal/mcp --tools=all` server (a real sandbox refund worked) until the hosted one is confirmed working.
+- **The token is readable by the agent's shell** when set in the Claude environment: use proxy mode (3b) for custody, and the guard hook as a best-effort layer.
+
+## 4. Known limits (also in THREAT-MODEL.md)
+- A hook is a guardrail for **your own** agent, not a security boundary. A determined agent with shell access can obfuscate a PayPal call (tests show a base64-encoded host is not caught). The strong fix is credential custody: see section 3b (proxy mode).
+- A user can edit or remove hooks. Run `npm run doctor` after any settings change.
+- If the Leash service is down, PayPal tool calls are blocked, by design.
+
+## 5. Uninstall
+Remove the hook blocks from `.claude/settings.json` and restart Claude Code.
