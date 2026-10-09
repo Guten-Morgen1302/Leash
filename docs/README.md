@@ -12,6 +12,7 @@
 | [DEMO-SCRIPT.md](DEMO-SCRIPT.md) | Timecoded 3-minute video script and rehearsal checklist |
 | [reviews/strategy-red-team.md](reviews/strategy-red-team.md) | Strategy red-team: how rivals would beat the plan |
 | [THREAT-MODEL.md](THREAT-MODEL.md) | Claims and non-claims, 15 threats, hash-chain limits, judge Q&A |
+| [reviews/leashbench/](reviews/leashbench/) | LeashBench v0: real-agent injection benchmark, raw results and replay through Leash |
 | [IMPACT.md](IMPACT.md) | Sourced impact case, audience, innovation comparison, claims allowed and banned |
 | [DEVPOST.md](DEVPOST.md) | Draft Devpost technical, innovation and impact text, with an evidence checklist |
 | [reviews/mcp-tool-payloads.md](reviews/mcp-tool-payloads.md) | WIN-T1 source audit: real tool names, payloads, verdict, what is still unverified |

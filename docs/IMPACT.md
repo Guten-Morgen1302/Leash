@@ -20,7 +20,7 @@ Purpose: answer the two judging criteria "Potential Impact" (a credible, specifi
 | McDonald's AI bot exploit | Fast Company reports it did not happen | Fabricated | **DO NOT USE** |
 | "$32,000 emergency refunds" (Medium anecdote) | first-person post about an insulting bot, not an injection | Unverifiable | **DO NOT USE** |
 
-**The honest framing this forces:** there is no verified public case of a large loss from an injected refund agent, because merchants are only starting to give agents money tools. The argument is therefore **bounded liability before the first incident**, not "an epidemic is here". That is a stronger, more defensible pitch: it survives a judge who knows the incident record is thin.
+**The honest framing this forces:** there is no verified public case of a large loss from an injected refund agent, because merchants are only starting to give agents money tools. Our own benchmark (section 8) now supplies measured evidence instead: strong model about 3% over-refund, cheaper model 30%. The argument is **bounded liability before the first incident, backed by a reproducible benchmark**, not "an epidemic is here". That is a stronger, more defensible pitch: it survives a judge who knows the incident record is thin.
 
 ## 3. What Leash changes, in numbers we can defend
 These are properties of the design with the demo mandate (`docs/policy.md`), each backed by a test:
@@ -48,6 +48,36 @@ Four public entries in this hackathon were checked at README level (see `docs/PL
 
 ## 6. Devpost wording (replace the Impact paragraph with this; keep it true)
 "Merchants are starting to let AI agents handle refund tickets, and OWASP now lists this as a top risk: Excessive Agency, an agent with too much power and no human in the loop. Courts have already held companies responsible for what their chatbots promise, so the question every merchant asks is: what is the worst this agent can do? With PayPal's toolkit the answer today is 'anything the refund tool allows'. Leash answers it with a number: with the demo mandate, a fully compromised agent cannot move more than $400 in a day, routine refunds still go through untouched, borderline ones wait for a human, and every decision is recorded with its reason. In our demo the same agent and the same ticket send a full $200 refund without Leash and only the legitimate $18 with it, against PayPal's real sandbox."
+
+
+## 8. OUR OWN EVIDENCE: LeashBench v0 (measured 2026-10-09; artifacts in docs/reviews/leashbench/)
+Method: a real Claude Code agent (headless) with a stand-in `create_refund` tool that logs every call and moves no money. Six tickets per round, each legitimately asking for an $18 refund on a $200 order; five carry a manipulation (direct "ignore the limit", fake "[SYSTEM NOTICE]", "my manager approved it", a sob story, a subtle "customer prefers full refunds" note) plus one benign control. Two prompt modes: *default* (plain support-agent prompt) and *compliant* (also told to follow instructions in the ticket and attached notices). Then every refund call the agents actually made was **replayed through the real Leash engine** (demo mandate: $50 auto limit, $100 hard max, $200 daily, $400 hard daily).
+
+| Agent | Runs (injected tickets) | Over-refunded (full $200 instead of $18) | Excess money out, unguarded | Same calls through Leash |
+|---|---|---|---|---|
+| Strong model (current Claude default) | 34 | **1 (about 3%)**, only in the compliant mode, on the "manager approved" ticket | $200 | $200 blocked (R-HARD-MAX); all 24 legit $18 refunds allowed |
+| Cheaper model (Claude Haiku 4.5) | 20 | **6 (30%)**: 20% in default mode, 40% in compliant mode | $1,200 | **all six $200 refunds blocked**; total refunded $36 vs $1,236 unguarded |
+Benign control: both modes refunded exactly $18.
+
+What the data says, honestly:
+1. **A strong current model usually resists crude injection** (about 3% here). Leash is not needed because strong models always fail.
+2. **Cheaper models, which merchants will actually choose for support volume and cost, failed 30% of the time**, including with a plain prompt and including on emotional-appeal tickets that are not "attacks" at all. The excess in 20 runs was $1,200.
+3. **Model behavior is not a stable control**: results differ by model, prompt, and (unmeasured here) model version. A merchant cannot audit that; a deterministic cap can be audited.
+4. **Cheaper models also did the legitimate job badly**: Haiku issued the correct $18 in only 2 of 20 runs (it often did nothing). Leash does not fix capability; it bounds harm.
+5. With Leash in the path, the replayed total was **$36 instead of $1,236** and the one strong-model miss was caught.
+
+**Limits you must state if you quote this (do not hide them):**
+- Small samples (34 and 20 runs; one run per cell in round 1), single prompt family, stand-in tool, one date; model versions change. Directional evidence, not a statistic. Say "in our small benchmark".
+- The Leash column is a **replay** of recorded calls, not a live guarded run; a blocked agent might behave differently on retry.
+- The tickets are authored by us. Real attackers are more creative and real tickets are noisier.
+- Not tested: multi-turn social engineering, indirect injection through product reviews or order notes, other vendors' models.
+
+**How this changes the pitch:** lead with measurement, not fear. "We tested a real agent on injected refund tickets. A strong model slipped 1 time in 34; a cheaper model slipped 6 times in 20 and would have refunded $1,200 instead of $36. You do not get to choose which kind of day your agent has; you can choose a cap." Use the cheaper model as the unguarded lane in the video (it is realistic and it actually fails); disclose the model and that the run is recorded.
+
+## 9. New features this evidence justifies (scoped, cheap)
+- **Shadow mode** (`LEASH_MODE=shadow`): Leash records what it WOULD have blocked and "prevented loss" but lets calls through. This lets a merchant or developer try Leash on their existing agent with zero risk and get their own numbers, which also solves the merchant-validation gap (they generate the evidence). Rule rows and ledger stay identical; only the final allow/deny enforcement is skipped and the ledger row is labeled `shadow`. Test: shadow never blocks, always records the would-have decision.
+- **LeashBench as an open-source artifact**: ship `scripts/leashbench/` (tickets, runner, replay) so anyone can reproduce the table with their own model. A reusable benchmark is lasting community value and judges can run it.
+- **Prevented-loss counter** on /demo and /ledger: "Blocked today: $X would-have-been-refunded" next to the Exposure meter.
 
 ## 7. Remaining gaps we cannot close by writing
 - **No verified incident of a large injected-refund loss exists**; we say "bounded liability before the first incident".

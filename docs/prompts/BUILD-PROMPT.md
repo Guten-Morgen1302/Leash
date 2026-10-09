@@ -74,5 +74,8 @@ All five gates pass; `npm test` green on both SQLite drivers; the demo runs keyl
 ## 6b. When you receive a test report
 If a tester hands you a report, stop building and follow `docs/prompts/FIX-PROMPT.md` exactly (fix loop with regression tests and a retest handoff). Never mark a finding fixed without a test that failed before and passes after.
 
+## 6c. Evidence features (docs/IMPACT.md sections 8 and 9)
+Add: shadow mode (`LEASH_MODE=shadow`, records would-have decisions, never blocks, ledger rows labeled `shadow`, with a test), a prevented-loss counter beside the Exposure meter, and `scripts/leashbench/` (copy and clean up `docs/reviews/leashbench/`, runnable with the user's own model; never commit results containing secrets). Re-run the benchmark at Gate 5 and refresh the numbers in docs/DEVPOST.md.
+
 ## 7. Stretch (only after Gate 5, in this order, each optional)
 live Gemini ticket box (rate limited, token capped); Playwright e2e as CI job; published head hash for the ledger seal; webhook reconciliation; mandate builder UI. Do NOT add: Docker, other languages, other PayPal tools, dispute/invoice flows (they stay absent from the proxy by design).
