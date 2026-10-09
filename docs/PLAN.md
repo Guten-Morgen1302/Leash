@@ -1020,6 +1020,14 @@ Measured (docs/IMPACT.md section 8, artifacts in docs/reviews/leashbench/): stro
 - **Add shadow mode, a prevented-loss counter, and ship LeashBench as a repo artifact** (IMPACT.md section 9). Shadow mode lets real merchants produce their own evidence with zero risk.
 - **Re-run LeashBench before submission** (new date, more runs, add a third model if a key is available) and update the numbers; never publish numbers older than the code they describe.
 
+## Independent Judge Corrections (2026-10-09)
+Source: docs/reviews/independent-judge-2026-10-09.md and docs/IMPACT.md sections 10 to 12. Honest baseline: Innovation 4/10, Impact 5/10 before the build and a merchant quote; earlier self-ratings of 8.5 are withdrawn.
+- **Audience repositioned:** primary = the developer or agency configuring the agent for a merchant; merchant = beneficiary and approver.
+- **New must-have page `/mandate`:** read-only, plain-language rendering of mandate.json (no editing); test: every field in mandate.json appears in the page text.
+- **Pitch re-centered on LeashBench and the measured finding;** category-level comparison paragraph added.
+- **Live guarded benchmark done** (9 of 16 unguarded over-refunded; 0 of 8 live with Leash moved excess money). **Harness defect retracted** (tool search): older no-action claims invalid, older rates are lower bounds; re-run before final numbers.
+- **Still open, user-owned:** 2 to 3 real merchant or support-lead conversations and one permissioned quote.
+
 ## GSTACK REVIEW REPORT
 
 | Review | Trigger | Why | Runs | Status | Findings |

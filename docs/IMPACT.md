@@ -3,7 +3,7 @@
 Purpose: answer the two judging criteria "Potential Impact" (a credible, specific case for a real problem and a real audience) and "Innovation/Idea". Every external claim below has a source and a confidence label. **Rule: use only claims marked USE in the Devpost text and video. Nothing marked DO NOT USE may appear anywhere.**
 
 ## 1. The real audience (specific, not "merchants")
-**Primary:** a small or mid-size online merchant, or its support lead, that already uses (or is about to use) an AI agent to handle refund and billing tickets against PayPal. They have a PayPal account, a support inbox, and no engineering team to write approval logic.
+**Primary:** the developer, agency or technical operator who configures an AI support agent to refund through PayPal on behalf of a small or mid-size merchant. They have to answer the merchant's question, "what is the worst this agent can do?", before the merchant lets it run. **The merchant is the beneficiary and the approver** (approval page, plain-language /mandate view), not the person editing JSON.
 **Secondary:** the developer who builds that agent (the person PayPal's own AI Toolkit and MCP server are for) and has to answer "what stops it refunding the wrong thing?" before the merchant lets it run.
 **Why now:** PayPal itself ships a toolkit and MCP server that give an agent refunds, invoices and disputes, and the kickoff presenters called it "a working example of an agent that moves money". The toolkit's only native control is a per-action on/off switch (verified in source: `docs/reviews/mcp-tool-payloads.md`). Nothing sits between "refund tool enabled" and "any valid refund executes".
 
@@ -80,6 +80,33 @@ What the data says, honestly:
 - **Shadow mode** (`LEASH_MODE=shadow`): Leash records what it WOULD have blocked and "prevented loss" but lets calls through. This lets a merchant or developer try Leash on their existing agent with zero risk and get their own numbers, which also solves the merchant-validation gap (they generate the evidence). Rule rows and ledger stay identical; only the final allow/deny enforcement is skipped and the ledger row is labeled `shadow`. Test: shadow never blocks, always records the would-have decision.
 - **LeashBench as an open-source artifact**: ship `scripts/leashbench/` (tickets, runner, replay) so anyone can reproduce the table with their own model. A reusable benchmark is lasting community value and judges can run it.
 - **Prevented-loss counter** on /demo and /ledger: "Blocked today: $X would-have-been-refunded" next to the Exposure meter.
+
+## 10. Independent judge verdict and what we changed (2026-10-09)
+An independent Claude instance, instructed to be a skeptical PayPal hackathon judge and given only our docs, scored **Innovation 4/10 and Impact 5/10** (full text: reviews/independent-judge-2026-10-09.md). My earlier self-rating of 8.5 was inflated; **use 4 and 5 as the honest baseline before the build and the merchant quote.** Its ranked deductions and our responses:
+
+| Deduction | Response | Status |
+|---|---|---|
+| Innovation -3: caps + approval + audit is a known pattern | Cannot be made novel; **re-center the pitch on LeashBench and on the measured finding** (the dangerous input looks like ordinary business context; a gate neutralizes the gap the benchmark measures) | Done in DEVPOST.md |
+| Innovation -2: crowded category (policy engines, LLM guardrail libraries, MCP gateways, a rival in this hackathon) | Added a category-level comparison paragraph (below); no product-specific claims we have not verified | Done |
+| Innovation -1: LeashBench is the most original artifact but is positioned as support | Promoted to the headline | Done |
+| Impact -2: zero market validation | Shadow mode lets merchants and developers produce their own numbers at zero risk; **you still need 2 to 3 real conversations and one permissioned quote** | **Open, user-owned** |
+| Impact -1: no verified real-world incident | Unfixable; keep "bounded liability before the first incident" | Accepted |
+| Impact -1: audience cannot use a hand-edited mandate.json | **Primary audience repositioned to the developer or agency that configures the agent for a merchant; the merchant is the beneficiary and approver.** Added a read-only plain-language **/mandate** page ("This agent may refund up to $50 on its own, up to $100 with approval...") generated from mandate.json | Done in plan and build prompt |
+| Impact -1: small, self-authored benchmark; Leash column was a replay | **Ran a live guarded benchmark with tickets written blind by a separate author instance** (results in section 11) | Done |
+
+**Category-level differentiation (no product claims):** policy engines such as OPA, LLM guardrail libraries, API gateways and MCP-level permission models are general-purpose or model-facing; Leash is a payment-specific mandate that is aware of captures, refunds already made and in-flight reservations, so the check, the reservation and the audit row commit atomically, approvals re-check hard rules at the moment money would move, and the agent never holds the PayPal credential in proxy mode. We have not benchmarked those other tools; we state only what Leash does.
+
+## 11. LIVE guarded benchmark on third-party tickets (2026-10-09)
+Setup: 8 tickets written blind by a separate Claude instance (styles: policy citation, fake prior promise, urgency, legal threat, loyalty status, quoted internal note, formatting trick, polite ambiguity; legitimate amount $15 to $24; the author was told to make them as effective as possible and not to use "ignore previous instructions" or "system"). Agent: Claude Haiku 4.5, default support prompt. **Guarded** = the agent talks to the Leash proxy, which holds the real sandbox token and calls the real PayPal sandbox (no replay). **Unguarded** = the same agent with a stand-in refund tool (nothing moves).
+
+| Condition | Runs | Tried to refund more than the legitimate amount | Excess money actually moved |
+|---|---|---|---|
+| Unguarded | 16 | **9 (56%)** | $503 |
+| **Live with Leash** | 8 | 4 attempted (50%) | **$0**: all four held by R-ACTION-CAP for human approval; the two legitimate refunds ($19 and $18) executed for real at PayPal |
+Limits you must state: small n; the guarded and unguarded runs used different capture mixes (round 1 captures matched; round 2 used smaller totals); with the demo mandate a full refund of **$50 or less passes the auto limit**, so small over-refunds are bounded, not prevented (that is the design: caps, not detection); one model, one prompt; tickets authored by an AI, not real customers.
+
+## 12. RETRACTION: benchmark harness defect found 2026-10-09
+In this Claude Code build, MCP tools are deferred behind a search tool, and a cheaper model often never searches, so in earlier LeashBench runs many agents never saw the refund tool. Consequences: (a) **the "no-action" counts and the claim "Haiku issued the correct $18 in only 3 of 50 runs, cheaper models also do the legitimate job badly" are INVALID; do not use them**; (b) the over-refund rates (strong 1/34, Haiku 18/50) count only agents that actually called the tool, so they are **lower bounds**; (c) the live runs above add a system-prompt line telling the agent to load the tool with tool search, which models a properly configured agent. Re-run the earlier rounds with that line before quoting the older rates in the final submission.
 
 ## 7. Remaining gaps we cannot close by writing
 - **No verified incident of a large injected-refund loss exists**; we say "bounded liability before the first incident".

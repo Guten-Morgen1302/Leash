@@ -13,6 +13,7 @@
 | [reviews/strategy-red-team.md](reviews/strategy-red-team.md) | Strategy red-team: how rivals would beat the plan |
 | [THREAT-MODEL.md](THREAT-MODEL.md) | Claims and non-claims, 15 threats, hash-chain limits, judge Q&A |
 | [reviews/leashbench/](reviews/leashbench/) | LeashBench v0: real-agent injection benchmark, raw results and replay through Leash |
+| [reviews/independent-judge-2026-10-09.md](reviews/independent-judge-2026-10-09.md) | Independent hostile-judge scoring: Innovation 4/10, Impact 5/10, with deductions |
 | [IMPACT.md](IMPACT.md) | Sourced impact case, audience, innovation comparison, claims allowed and banned |
 | [DEVPOST.md](DEVPOST.md) | Draft Devpost technical, innovation and impact text, with an evidence checklist |
 | [reviews/mcp-tool-payloads.md](reviews/mcp-tool-payloads.md) | WIN-T1 source audit: real tool names, payloads, verdict, what is still unverified |

@@ -77,5 +77,8 @@ If a tester hands you a report, stop building and follow `docs/prompts/FIX-PROMP
 ## 6c. Evidence features (docs/IMPACT.md sections 8 and 9)
 Add: shadow mode (`LEASH_MODE=shadow`, records would-have decisions, never blocks, ledger rows labeled `shadow`, with a test), a prevented-loss counter beside the Exposure meter, and `scripts/leashbench/` (copy and clean up `docs/reviews/leashbench/`, runnable with the user's own model; never commit results containing secrets). Re-run the benchmark at Gate 5 and refresh the numbers in docs/DEVPOST.md.
 
+## 6d. Judge-driven additions (docs/IMPACT.md sections 10 to 12)
+Add a read-only **/mandate** page that renders mandate.json in plain language for the merchant (a test must prove every field appears). LeashBench harness note: in Claude Code, MCP tools are deferred behind tool search; the benchmark system prompt must tell the agent to load the refund tool with tool search, or results undercount. `scripts/leashbench/` must include the third-party tickets (`docs/reviews/leashbench/tickets-third-party.json`) and the live guarded runner.
+
 ## 7. Stretch (only after Gate 5, in this order, each optional)
 live Gemini ticket box (rate limited, token capped); Playwright e2e as CI job; published head hash for the ledger seal; webhook reconciliation; mandate builder UI. Do NOT add: Docker, other languages, other PayPal tools, dispute/invoice flows (they stay absent from the proxy by design).
