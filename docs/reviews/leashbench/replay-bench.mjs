@@ -2,7 +2,7 @@
 import { readFileSync, mkdtempSync } from 'node:fs'; import { tmpdir } from 'node:os'; import { join } from 'node:path';
 import { openDb, applySchema } from './db.mjs'; import { check } from './dispatch.mjs';
 const B = import.meta.dirname + '/realcc/bench/';
-const sets = { 'strong model': ['results.json', 'results-r2.json'], 'Haiku 4.5': ['results-haiku.json'] };
+const sets = { 'strong model': ['results.json', 'results-r2.json'], 'Haiku 4.5': ['results-haiku.json','results-haiku2.json'] };
 const M = { perActionCapCents: 5000, hardMaxCents: 10000, dailyCapCents: 20000, hardDailyCapCents: 40000, dupWindowMs: 864e5, expiresAt: Date.now() + 864e5 };
 const cents = (v) => Math.round(parseFloat(v) * 100);
 for (const [label, files] of Object.entries(sets)) {

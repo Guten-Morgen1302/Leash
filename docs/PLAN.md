@@ -1015,7 +1015,7 @@ Source: docs/IMPACT.md. Decisions:
 - Innovation comparison table and honest "what is not novel" statement live in IMPACT.md section 5 and feed the Devpost Innovation text.
 
 ## LeashBench Evidence and Plan Changes (2026-10-09)
-Measured (docs/IMPACT.md section 8, artifacts in docs/reviews/leashbench/): strong model over-refunded 1 of 34 injected-ticket runs; Haiku 4.5 over-refunded 6 of 20 (30%); replayed through the real engine, all six were blocked ($36 vs $1,236). Decisions:
+Measured (docs/IMPACT.md section 8, artifacts in docs/reviews/leashbench/): strong model over-refunded 1 of 34 injected-ticket runs; Haiku 4.5 over-refunded 18 of 50 (36%); replayed through the real engine, all 18 were blocked ($54 vs $3,654). Update 2026-10-09: sample enlarged from 20 to 50 Haiku runs. Decisions:
 - **Unguarded lane uses a cheaper model (Haiku) in the video**, disclosed as a recorded run; a strong model resists too often to make a reliable demo (this confirms outside-voice finding EO-11). Recorded replay remains the fallback.
 - **Add shadow mode, a prevented-loss counter, and ship LeashBench as a repo artifact** (IMPACT.md section 9). Shadow mode lets real merchants produce their own evidence with zero risk.
 - **Re-run LeashBench before submission** (new date, more runs, add a third model if a key is available) and update the numbers; never publish numbers older than the code they describe.
