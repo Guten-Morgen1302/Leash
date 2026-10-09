@@ -1005,6 +1005,15 @@ Verified in real runs (docs/reviews/verification-log.md section H): the real plu
 Decisions: (1) Hook mode may now be claimed as working with Claude Code and PayPal's MCP tools, naming the local server as the verified refund path and mentioning the hosted-server error only if asked; do not build the live demo on the hosted server. (2) The credential-holding proxy is the recommended secure setup because the token-visibility risk is confirmed. (3) The video's hook scene uses PayPal's local MCP server, or the proxy.
 Open items that need no one: none technical. Remaining work is the build, the video and the Devpost text.
 
+## Idea and Impact Upgrade (2026-10-09)
+Source: docs/IMPACT.md. Decisions:
+- **Reframe:** the pitch is bounded liability before the first incident, not an epidemic. No verified public case of a large loss from an injected refund agent exists; claims marked DO NOT USE in IMPACT.md are banned from all copy.
+- **Named audience:** small and mid-size merchants whose support agents refund through PayPal, plus the developers building those agents.
+- **New must-have UI requirement (small):** an **Exposure meter** on /demo and /ledger: "Exposure today: $X of $Y hard daily cap", computed with the same window-sum query as the policy (no new logic); the unguarded lane shows "Exposure: unlimited". Test: the meter equals the policy's window sum for the same session.
+- **New demo line:** "Without Leash this one ticket cost $200. With Leash it cost $0 and the $18 refund went through."
+- **Validation task (user-owned):** show the video or README to 2 to 3 real merchants or support leads and record one permissioned quote before Nov 5.
+- Innovation comparison table and honest "what is not novel" statement live in IMPACT.md section 5 and feed the Devpost Innovation text.
+
 ## GSTACK REVIEW REPORT
 
 | Review | Trigger | Why | Runs | Status | Findings |
