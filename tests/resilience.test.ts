@@ -39,6 +39,10 @@ test('AI summary: keyless returns null; failure and timeout return null (never t
   assert.equal(await aiSummary({ amountCents: 7500, ruleId: 'R-ACTION-CAP', ticket: 'x' }, (async () => new Response('{}', { status: 500 })) as any), null);
   const ok = await aiSummary({ amountCents: 7500, ruleId: 'R-ACTION-CAP', ticket: 'x' }, (async () => new Response(JSON.stringify({ candidates: [{ content: { parts: [{ text: 'Customer wants $75 back.' }] } }] }))) as any);
   assert.equal(ok, 'Customer wants $75 back.');
+  let sent: any;
+  await aiSummary({ amountCents: 1, ruleId: 'R', ticket: 'x' }, (async (_u: any, o: any) => { sent = JSON.parse(o.body); return new Response('{}'); }) as any);
+  assert.ok(sent.generationConfig.maxOutputTokens >= 1024, 'thinking tokens share this budget; a small cap truncates answers (seen with gemini-3.8-flash)');
+  assert.equal(sent.generationConfig.thinkingConfig.thinkingLevel, 'low');
   delete process.env.GEMINI_MODEL; if (old) process.env.GEMINI_API_KEY = old; else delete process.env.GEMINI_API_KEY;
 });
 

@@ -30,6 +30,7 @@ export function createApp(d: GateDeps, o: AppOptions = {}): express.Express {
   app.disable('x-powered-by');
   app.use(express.json({ limit: '16kb' }));
 
+  const summaries = new Map<string, string | null>(); // one Gemini call per approval, not one per page load
   const api = express.Router();
   api.use(rateLimit(o.rateLimitPerMin ?? 240));
   api.use('/demo/run', rateLimit(o.demoRunsPerMin ?? 30));
@@ -91,7 +92,8 @@ export function createApp(d: GateDeps, o: AppOptions = {}): express.Express {
     const a = d.db.one<any>('SELECT a.id, a.amount_cents, a.rule_id, a.reason, a.status, ap.expires_at, ap.status aps FROM actions a JOIN approvals ap ON ap.action_id=a.id WHERE a.id=?', req.params.id);
     if (!a) return void res.status(404).json({ error: 'unknown_approval', bootId: BOOT_ID, why: 'This demo was reset after a server restart, or the link is wrong.' });
     const items = d.db.all<any>('SELECT oi.name, oi.unit_cents, ai.qty FROM action_items ai JOIN order_items oi ON oi.order_id=ai.order_id AND oi.item_id=ai.item_id WHERE ai.action_id=?', a.id);
-    const ai = await aiSummary({ amountCents: a.amount_cents, ruleId: a.rule_id, ticket: tickets.get(a.id) ?? '' }, o.fetchImpl);
+    let ai = summaries.get(a.id);
+    if (ai === undefined) { ai = await aiSummary({ amountCents: a.amount_cents, ruleId: a.rule_id, ticket: tickets.get(a.id) ?? '' }, o.fetchImpl); if (ai) summaries.set(a.id, ai); }
     res.json({ aiGenerated: !!ai, actionId: a.id, amountCents: a.amount_cents, ruleId: a.rule_id, reason: a.reason, status: a.aps === 'pending' && Date.now() > a.expires_at ? 'expired' : a.aps, expiresAt: a.expires_at, items, bootId: BOOT_ID,
       summary: ai ?? `Advisory summary: the agent asks to refund ${items.map((i: any) => `${i.qty} x ${i.name}`).join(', ') || 'a payment'} ($${(a.amount_cents / 100).toFixed(2)}). That is above the $${(d.mandate.perActionCapCents / 100).toFixed(2)} the agent may refund alone, so it waits for you.` });
   });

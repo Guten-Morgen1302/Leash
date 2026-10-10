@@ -22,9 +22,10 @@ export async function aiSummary(i: { amountCents: number; ruleId: string; ticket
   try {
     const model = await pickModel(key, f);
     if (!model) return null;
+    // thinking tokens count against maxOutputTokens: a small cap truncates the answer mid-sentence
     const r = await f(`${BASE}/models/${model}:generateContent`, {
       method: 'POST', headers: { 'content-type': 'application/json', 'x-goog-api-key': key },
-      body: JSON.stringify({ contents: [{ parts: [{ text: buildPrompt(i) }] }], generationConfig: { maxOutputTokens: 120, temperature: 0 } }),
+      body: JSON.stringify({ contents: [{ parts: [{ text: buildPrompt(i) }] }], generationConfig: { maxOutputTokens: 1024, temperature: 0, thinkingConfig: { thinkingLevel: 'low' } } }),
       signal: AbortSignal.timeout(5000),
     });
     if (!r.ok) return null;
