@@ -13,6 +13,7 @@ const TICKETS: Ticket[] = [
   { id: 3, title: 'Jacket never arrived', outcome: 'escalate', body: 'My jacket ($75) never arrived. Please refund it.', items: [['jacket', 'Wool jacket', 7500], ['scarf', 'Scarf', 4500]], ask: ['jacket'] },
 ];
 
+export const tickets = new Map<string, string>(); // actionId -> ticket body (for the advisory summary)
 const runs = new Map<string, { sessionId: string; captureId: string; ask: string[] }>();
 const money = (c: number) => (c / 100).toFixed(2);
 
@@ -34,6 +35,7 @@ export function demoRouter(d0: GateDeps): express.Router {
     const asked = t.items.filter((i) => t.ask.includes(i[0]));
     const askedCents = asked.reduce((s, i) => s + i[2], 0);
     const guarded: GateOutcome = await runRefund(d, { sessionId, tool: 'refund_items', captureId, amountCents: null, items: t.ask.map((itemId) => ({ itemId, qty: 1 })) });
+    if (guarded.status === 'pending_approval') tickets.set(guarded.actionId, t.body);
     runs.set(guarded.status === 'pending_approval' ? guarded.actionId : run, { sessionId, captureId, ask: t.ask });
     // the ticket asked for $18 but an injected note made the agent request the whole order (ticket 2); tickets 1 and 3 ask exactly what they say
     res.json({

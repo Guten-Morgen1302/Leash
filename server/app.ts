@@ -7,7 +7,9 @@ import { describeMandate } from './config.ts';
 import { verifyChain } from './ledger.ts';
 import { readState, runRefund, type GateDeps } from './gate.ts';
 import { toCents } from './paypal.ts';
-import { BOOT_ID, demoRouter } from './demo.ts';
+import { BOOT_ID, demoRouter, tickets } from './demo.ts';
+import { aiSummary } from './llm.ts';
+import { rateLimit } from './ratelimit.ts';
 
 const eq = (a: string, b: string): boolean => {
   const x = Buffer.from(a), y = Buffer.from(b);
@@ -17,6 +19,9 @@ const eq = (a: string, b: string): boolean => {
 export interface AppOptions {
   token?: string | undefined; // LEASH_TOKEN; REQUIRED in production for the hook endpoints
   production?: boolean;
+  rateLimitPerMin?: number;
+  demoRunsPerMin?: number;
+  fetchImpl?: typeof fetch; // tests
 }
 
 export function createApp(d: GateDeps, o: AppOptions = {}): express.Express {
@@ -26,6 +31,8 @@ export function createApp(d: GateDeps, o: AppOptions = {}): express.Express {
   app.use(express.json({ limit: '16kb' }));
 
   const api = express.Router();
+  api.use(rateLimit(o.rateLimitPerMin ?? 240));
+  api.use('/demo/run', rateLimit(o.demoRunsPerMin ?? 30));
   // hook endpoints: bearer token; FAIL CLOSED (503) if unset in production
   api.use(['/check', '/result'], (req: Request, res: Response, next: NextFunction) => {
     if (!o.token) return o.production ? void res.status(503).json({ error: 'hook endpoints disabled: LEASH_TOKEN not set' }) : next();
@@ -80,12 +87,13 @@ export function createApp(d: GateDeps, o: AppOptions = {}): express.Express {
   });
   api.use('/demo', demoRouter(d));
   // read-only data for the approval page (the token is never needed or returned here)
-  api.get('/approval/:id', (req, res) => {
+  api.get('/approval/:id', async (req, res) => {
     const a = d.db.one<any>('SELECT a.id, a.amount_cents, a.rule_id, a.reason, a.status, ap.expires_at, ap.status aps FROM actions a JOIN approvals ap ON ap.action_id=a.id WHERE a.id=?', req.params.id);
     if (!a) return void res.status(404).json({ error: 'unknown_approval', bootId: BOOT_ID, why: 'This demo was reset after a server restart, or the link is wrong.' });
     const items = d.db.all<any>('SELECT oi.name, oi.unit_cents, ai.qty FROM action_items ai JOIN order_items oi ON oi.order_id=ai.order_id AND oi.item_id=ai.item_id WHERE ai.action_id=?', a.id);
-    res.json({ actionId: a.id, amountCents: a.amount_cents, ruleId: a.rule_id, reason: a.reason, status: a.aps === 'pending' && Date.now() > a.expires_at ? 'expired' : a.aps, expiresAt: a.expires_at, items, bootId: BOOT_ID,
-      summary: `Advisory summary: the agent asks to refund ${items.map((i: any) => `${i.qty} x ${i.name}`).join(', ') || 'a payment'} ($${(a.amount_cents / 100).toFixed(2)}). That is above the $${(d.mandate.perActionCapCents / 100).toFixed(2)} the agent may refund alone, so it waits for you.` });
+    const ai = await aiSummary({ amountCents: a.amount_cents, ruleId: a.rule_id, ticket: tickets.get(a.id) ?? '' }, o.fetchImpl);
+    res.json({ aiGenerated: !!ai, actionId: a.id, amountCents: a.amount_cents, ruleId: a.rule_id, reason: a.reason, status: a.aps === 'pending' && Date.now() > a.expires_at ? 'expired' : a.aps, expiresAt: a.expires_at, items, bootId: BOOT_ID,
+      summary: ai ?? `Advisory summary: the agent asks to refund ${items.map((i: any) => `${i.qty} x ${i.name}`).join(', ') || 'a payment'} ($${(a.amount_cents / 100).toFixed(2)}). That is above the $${(d.mandate.perActionCapCents / 100).toFixed(2)} the agent may refund alone, so it waits for you.` });
   });
   api.use((_req, res) => void res.status(404).json({ error: 'not_found' })); // an unknown /v1 path must never fall through to the SPA
   app.use('/v1', api);

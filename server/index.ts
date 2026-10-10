@@ -25,7 +25,16 @@ if (existsSync('web/dist')) {
   app.use(express.static('web/dist'));
   app.get(/^\/(?!v1\/).*/, (_req, res) => void res.sendFile('index.html', { root: 'web/dist' }));
 }
-const timer = setInterval(() => { try { sweep(db, Date.now()); } catch { /* retried next tick */ } }, 30_000);
-const server = app.listen(port, () => console.log(`Leash on ${publicUrl} (${paypal ? 'LIVE-FIRE sandbox' : 'SIMULATED'})`));
+const timer = setInterval(() => { try { sweep(db, Date.now()); } catch { /* retried next tick */ } }, 60_000);
+const listen = (p: number, left = 10): Promise<{ server: import('node:http').Server; port: number }> =>
+  new Promise((resolve, reject) => {
+    // Express 5 passes a listen error to the callback
+    const srv = app.listen(p, (e?: Error) => {
+      if (!e) return resolve({ server: srv, port: p });
+      (e as NodeJS.ErrnoException).code === 'EADDRINUSE' && left > 0 ? resolve(listen(p + 1, left - 1)) : reject(e);
+    });
+  });
+const { server, port: bound } = await listen(port);
+console.log(`Leash on ${process.env.LEASH_PUBLIC_URL ?? `http://127.0.0.1:${bound}`} (${paypal ? 'LIVE-FIRE sandbox' : 'SIMULATED'})`);
 const stop = () => { clearInterval(timer); server.close(() => { db.close(); process.exit(0); }); setTimeout(() => process.exit(0), 3000).unref(); };
 process.on('SIGINT', stop); process.on('SIGTERM', stop);

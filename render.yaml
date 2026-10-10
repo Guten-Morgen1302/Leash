@@ -1,0 +1,18 @@
+# Optional hosting. Free tier notes: cold starts after idle, and the disk is ephemeral, so the ledger resets on redeploy. Single instance only (SQLite).
+services:
+  - type: web
+    name: leash
+    runtime: node
+    plan: free
+    buildCommand: npm ci && npm run web:build
+    startCommand: node --disable-warning=ExperimentalWarning server/index.ts
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: LEASH_DB
+        value: /tmp/leash.db
+      - key: LEASH_PUBLIC_URL
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
