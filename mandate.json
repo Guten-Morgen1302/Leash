@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "description": "Demo merchant: refund agent may refund up to $50 per action on its own; larger needs a human.",
+  "perActionCapCents": 5000,
+  "hardMaxCents": 10000,
+  "dailyCapCents": 20000,
+  "hardDailyCapCents": 40000,
+  "expiresAt": "2026-11-30T00:00:00Z",
+  "returnWindowDays": 30,
+  "blockIfOpenDispute": true
+}
