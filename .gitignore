@@ -25,3 +25,5 @@ paypal video transcript.txt
 
 # seed logs
 .seed-wallet.log
+
+.npm-install.log
