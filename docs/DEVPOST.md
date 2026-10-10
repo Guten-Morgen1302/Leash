@@ -54,3 +54,5 @@ See docs/IMPACT.md section 2: only claims marked USE may be published; verify th
 | "tamper-proof" (appeared in the outside review's wording) | BANNED |
 
 | "70 of 70 fields, 10 of 10 messy policies, 0 guessed on 14 unclear fields" | VERIFIED 2026-10-10 (IMPACT.md section 15, reviews/leashbench/cold-policy-compile.py); say "in a small test with independently written policies"; same-model-family and n=10 caveats must stay; replace with real-merchant policies before submission |
+
+| "compiles realistic policies and never invents a money limit" | VERIFIED in a small test (IMPACT.md section 16: 18 runs, 0 invented limits; one silent window loosening in the weaker prompt, fixed by the unsupported list). Do NOT claim it enforces store-credit, restocking-fee or category rules until D-V2-12 is built and D-V2-13 passes |

@@ -1053,6 +1053,15 @@ Decision record: docs/IMPACT.md section 14; outside review: docs/reviews/outside
 ## Compiler Evidence and Rule (2026-10-10)
 Cold-policy test (IMPACT.md section 15): 70 of 70 fields correct, all 14 unclear fields returned null with a question and none was guessed (n=10, same model family, author knew the task). **New requirement D-V2-8:** the policy compiler must emit null plus a clarifying question for any unclear field, and a mandate with any null field cannot be activated; no silent defaults. Test: a policy with a missing daily limit leaves the mandate inactive until answered.
 
+## Compiler Design Changes from the Three-Policy Test (2026-10-10)
+Source: docs/IMPACT.md section 16. Decisions (build waits for the user's instruction):
+- **D-V2-9:** compiler output includes a mandatory `unsupported` array (prompt variant B); the sign-off screen lists unsupported rules as NOT enforced.
+- **D-V2-10:** the Author stage is policy text (eligibility facts) plus a guided money-limits form with safe pre-filled defaults; a mandate with any null field cannot activate.
+- **D-V2-11:** compile 3 times at temperature 0; any disagreement on a field becomes null and a question; never a majority vote.
+- **D-V2-12 (minimum schema additions):** `refundMethodRestriction`, per-item flags (`final_sale`, `perishable_opened`, `personalized`) on trusted order data, `restockingFeePercent` and `restockingFeeFromDay`, `defectNoticeHours`; new rules R-ITEM-NONREFUNDABLE and R-REFUND-METHOD; fee subtracted from the computed amount. No further schema growth.
+- **D-V2-13:** tests: each of the three user policies must compile (with answers to the money-limit form) to a mandate whose enforcement is checked by tickets (a change-of-mind refund under a store-credit-only policy is blocked; an opened coffee bag is non-refundable; a day-38 handmade refund has the 15% fee subtracted).
+- Cut line unchanged: the compiler is stretch; if cut, `mandate.json` stays hand-edited and the item flags still ship.
+
 ## GSTACK REVIEW REPORT
 
 | Review | Trigger | Why | Runs | Status | Findings |
