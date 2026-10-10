@@ -35,3 +35,19 @@ export function verifyChain(db: Db): ChainResult {
   }
   return { ok: true, rows: n, head: prev };
 }
+
+/** Head hash after the first `n` rows (what a published head commits to). */
+export function headAt(db: Db, n: number): string | null {
+  if (n === 0) return GENESIS;
+  const r = db.one<{ hash: string }>('SELECT hash FROM ledger ORDER BY seq LIMIT 1 OFFSET ?', n - 1);
+  return r?.hash ?? null;
+}
+
+/** Checks a previously published (rows, head) pair: the chain must still be valid and the hash at that row count unchanged. Appending later rows is fine; rewriting history is not. */
+export function verifyPublished(db: Db, rows: number, head: string): { ok: boolean; why?: string } {
+  const c = verifyChain(db);
+  if (!c.ok) return { ok: false, why: `chain broken at row ${c.brokenAt}` };
+  const h = headAt(db, rows);
+  if (h === null) return { ok: false, why: `ledger has only ${c.rows} rows, fewer than the published ${rows}` };
+  return h === head ? { ok: true } : { ok: false, why: `hash at row ${rows} differs from the published head: history was rewritten` };
+}

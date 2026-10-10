@@ -36,3 +36,19 @@ export async function aiSummary(i: { amountCents: number; ruleId: string; ticket
     return null;
   }
 }
+
+/** Raw text completion for the policy compiler (temperature 0). Throws on any failure: the compiler treats a failed run as disagreement. */
+export async function askGemini(prompt: string, f: typeof fetch = fetch): Promise<string> {
+  const key = process.env.GEMINI_API_KEY;
+  if (!key) throw new Error('GEMINI_API_KEY is not set');
+  const model = await pickModel(key, f);
+  if (!model) throw new Error('no Gemini model available');
+  const r = await f(`${BASE}/models/${model}:generateContent`, {
+    method: 'POST', headers: { 'content-type': 'application/json', 'x-goog-api-key': key },
+    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { maxOutputTokens: 2048, temperature: 0, thinkingConfig: { thinkingLevel: 'low' } } }),
+    signal: AbortSignal.timeout(60_000),
+  });
+  if (!r.ok) throw new Error(`Gemini HTTP ${r.status}`);
+  const j = (await r.json()) as { candidates?: { content?: { parts?: { text?: string }[] } }[] };
+  return j.candidates?.[0]?.content?.parts?.map((p) => p.text ?? '').join('') ?? '';
+}

@@ -48,7 +48,7 @@ Other PayPal tools (`send_invoice`, `accept_dispute_claim`, ...) do not exist fo
 
 ## 3c. Verified facts about PayPal's tools (real runs, 2026-10-07/08)
 - The plugin's tool is `mcp__plugin_paypal_paypal-sandbox__create_refund`; the matcher `mcp__.*paypal.*` covers it and any server you name with "paypal".
-- **PayPal's hosted `create_refund` returned a server-side error in our run** (`PAYPAL_API_SETUP_ERROR: Unsupported cache mode: default`). Prefer PayPal's **local** `@paypal/mcp --tools=all` server (a real sandbox refund worked) until the hosted one is confirmed working.
+- **PayPal's hosted `create_refund`:** it returned a server-side error on 2026-10-08 (`PAYPAL_API_SETUP_ERROR: Unsupported cache mode: default`) but **worked on 2026-10-10** (SSE endpoint `https://mcp.sandbox.paypal.com/sse`, 46 tools, a $1.00 sandbox refund returned `COMPLETED`). It has failed before, so keep the hook's fail-closed behavior and re-test before filming. PayPal's local `@paypal/mcp --tools=all` also works.
 - **The token is readable by the agent's shell** when set in the Claude environment: use proxy mode (3b) for custody, and the guard hook as a best-effort layer.
 
 ## 4. Known limits (also in THREAT-MODEL.md)

@@ -131,12 +131,12 @@ for (const driver of ['better-sqlite3', 'node:sqlite'] as const) describe(`drive
     const db = await openDb(path, { driver }); const p = db.one<any>('SELECT reserved_cents r, refunded_cents f, captured_cents c FROM payments')!; assert.ok(p.r + p.f <= p.c);
   });
 
-  test('busy_timeout: lock held ~900ms; timeout 3000 waits and succeeds; timeout 0 fails with BUSY (negative control)', async () => {
+  test('busy_timeout: lock held ~3.5s; timeout 8000 waits and succeeds; timeout 0 fails with BUSY (negative control)', async () => {
     const { path } = await seed(driver, { CAP1: 100_000 }); const gate = new SharedArrayBuffer(4);
-    const holder = spawn(path, driver, gate, { holdMs: 900 });
+    const holder = spawn(path, driver, gate, { holdMs: 3500 });
     await wait(holder, (m) => m.ready); const locked = wait(holder, (m) => m.locked); release(gate); await locked;
     const g2 = new SharedArrayBuffer(4);
-    const patient = spawn(path, driver, g2, { input: A('p', 'CAP1', 1000), busyTimeoutMs: 3000 });
+    const patient = spawn(path, driver, g2, { input: A('p', 'CAP1', 1000), busyTimeoutMs: 8000 });
     const impatient = spawn(path, driver, g2, { input: A('q', 'CAP1', 1000, 's2'), busyTimeoutMs: 0 });
     const [rp, rq] = [wait(patient, (m) => m.d || m.err), wait(impatient, (m) => m.d || m.err)];
     await Promise.all([wait(patient, (m) => m.ready), wait(impatient, (m) => m.ready)]); release(g2);

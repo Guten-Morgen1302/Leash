@@ -20,9 +20,9 @@ Terminal version against a running server: `npm run replay`. Start over: `npm ru
 
 | Part | Status |
 |---|---|
-| Policy engine, reserve-then-execute transaction, approvals, ledger hash chain, item-scoped refunds, hooks, MCP proxy | Real code, tested (85 tests, both SQLite drivers; 40 injected benchmark runs against the real proxy, 0 dollars over the legitimate refund: docs/IMPACT.md section 17) |
+| Policy engine, reserve-then-execute transaction, approvals, ledger hash chain, item-scoped refunds, hooks, MCP proxy | Real code, tested (tests on both SQLite drivers; 40 injected benchmark runs against the real proxy, 0 dollars over the legitimate refund: docs/IMPACT.md section 17) |
 | Demo page | **SIMULATED**: fake captures, the final PayPal call is a stub (`SIM-` refund ids). Everything before that call is the real gate. |
-| LIVE-FIRE | Set `PAYPAL_CLIENT_ID` and `PAYPAL_CLIENT_SECRET` (sandbox app). One live run is recorded: an $18 item refund executed and confirmed by an independent GET at PayPal (`scripts/gate2-live.mjs`). The hosted PayPal MCP `create_refund` errored in our tests; the local `@paypal/mcp` works. |
+| LIVE-FIRE | Set `PAYPAL_CLIENT_ID` and `PAYPAL_CLIENT_SECRET` (sandbox app). One live run is recorded: an $18 item refund executed and confirmed by an independent GET at PayPal (`scripts/gate2-live.mjs`). PayPal's hosted MCP `create_refund` errored on 2026-10-08 and worked on 2026-10-10 (a $1.00 sandbox refund); the local `@paypal/mcp` works too. |
 | AI summary on the approval page | Advisory only; fixed template when `GEMINI_API_KEY` is unset or Gemini is slow. The gate never reads it. |
 
 ## Two ways to put it in front of an agent
