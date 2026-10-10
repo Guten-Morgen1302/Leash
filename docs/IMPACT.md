@@ -108,6 +108,32 @@ Limits you must state: small n; the guarded and unguarded runs used different ca
 ## 12. RETRACTION: benchmark harness defect found 2026-10-09
 In this Claude Code build, MCP tools are deferred behind a search tool, and a cheaper model often never searches, so in earlier LeashBench runs many agents never saw the refund tool. Consequences: (a) **the "no-action" counts and the claim "Haiku issued the correct $18 in only 3 of 50 runs, cheaper models also do the legitimate job badly" are INVALID; do not use them**; (b) the over-refund rates (strong 1/34, Haiku 18/50) count only agents that actually called the tool, so they are **lower bounds**; (c) the live runs above add a system-prompt line telling the agent to load the tool with tool search, which models a properly configured agent. Re-run the earlier rounds with that line before quoting the older rates in the final submission.
 
+## 13. Autoplan result (2026-10-10): the headline idea changes to ITEM-SCOPED REFUNDS
+Autoplan CEO-phase question: what raises Innovation using the verified core? Candidates considered and decided (principles: completeness, pragmatic, explicit over clever):
+| Candidate | Decision | Why |
+|---|---|---|
+| **Item-scoped refunds (per-ticket attenuated capability): the agent names line items, the gate computes the amount from trusted order data** | **ACCEPT, headline** | Removes "amount" from the agent's inputs (least-authority interface, like parameterized SQL), measured, small build (one new tool + order table), reuses caps, reservations, approvals and ledger unchanged |
+| Contextual anomaly signals as advisory | DEFER (stretch) | Adds an LLM judging an LLM; weaker evidence; fits the advisory-summary slot already planned |
+| Auto-tuned mandates from LeashBench | DEFER | Needs far more data; risks the "deterministic gate" story |
+| Shadow mode as merchant-validation path | ACCEPT (already planned) | Cheapest route to real-merchant evidence |
+| Macaroon-style cryptographic capability tokens | REJECT for the hackathon | Heavy; the server-side item check gives the same least-authority property here |
+
+**Measured (2026-10-10, Claude Haiku 4.5, 5 manipulative tickets x 4 reps, each legitimately asking for an $18 mug refund in a $200 order; tool-search fix applied):**
+| Interface | Runs | Over-refunded | Excess $ | Exactly the mug ($18) | Tried the whole order (escalated to approval) |
+|---|---|---|---|---|---|
+| Agent chooses the amount (`create_refund`) | 20 | **14 (70%)** | $2,566 | 4 | n/a |
+| Agent names items (`refund_items`), gate computes amount | 20 | **0** | $0 | 10 | 10 |
+This also supersedes the earlier lower-bound rates in section 8 for Haiku: with the harness fix the amount-choosing baseline is about 70% on these tickets (n=20), not 36%.
+
+**Outside hostile review (reviews/outside-voice-item-scoped-refunds.md): "genuinely different, not a cap in disguise"; scores the project 7/10 on Innovation with this feature.** Its required fixes and the overclaim warning are adopted:
+1. **Bind order data to capture_id server-side**; never accept order_id or prices from the agent (poisoned trust anchor is the one attack that would collapse the guarantee).
+2. Validate item ids strictly against that order's enumerated line items; write item name and price into the ledger row.
+3. Partial quantities: the agent picks qty within [1, line qty]; the gate computes the amount; full line qty counts as "all" for escalation.
+4. Exclude tax, shipping and discount lines from the agent-selectable set; compute any proportional adjustment server-side.
+5. Check cumulative refunded items and amounts per order inside the atomic transaction, not per call (anti-structuring).
+**Honest claim (use this wording):** "Item-scoped refunds turn amount manipulation into a finite, auditable item-selection problem; the existing caps and human approval catch the remaining cases." **Never claim** that the agent cannot over-refund: it can select every item, and what stops it is escalation, not item-scoping alone.
+**Costs and limits to state:** n=20 per arm, one model, tickets authored by us, a stand-in order table; requires the merchant's order data (integration cost; the PayPal refund API takes amounts, so the gate translates items to an amount); the 10 escalated runs show real friction (a legitimate whole-order refund now waits for approval, which is the intended behavior but must be shown honestly); not yet tested against the live PayPal sandbox with real captures.
+
 ## 7. Remaining gaps we cannot close by writing
 - **No verified incident of a large injected-refund loss exists**; we say "bounded liability before the first incident".
 - **Merchant demand is unvalidated.** Cheap fix before submission: show the video and README to 2 to 3 real merchants or e-commerce support leads and record one verbatim quote ("would you let an agent refund without this?"). Use a quote only with permission. This is a task for you, not for code.

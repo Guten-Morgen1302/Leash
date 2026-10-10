@@ -1028,6 +1028,16 @@ Source: docs/reviews/independent-judge-2026-10-09.md and docs/IMPACT.md sections
 - **Live guarded benchmark done** (9 of 16 unguarded over-refunded; 0 of 8 live with Leash moved excess money). **Harness defect retracted** (tool search): older no-action claims invalid, older rates are lower bounds; re-run before final numbers.
 - **Still open, user-owned:** 2 to 3 real merchant or support-lead conversations and one permissioned quote.
 
+## Autoplan (focused CEO-phase run) Results, 2026-10-10
+Scope note: the full snapshot-gated autoplan pipeline was NOT run end to end; the CEO, eng, design and DX reviews of this plan were already completed earlier. This run answered one question (what raises Innovation and demonstrable Impact), tested the leading candidate with real agents, and used the Claude-only outside voice. Decision record: docs/IMPACT.md section 13.
+- **D-AP-1 (ACCEPT, headline):** item-scoped refunds. New tool in the proxy (and hook-mode adapter where feasible): `refund_items(order_id, item_ids[], quantities?)`, plus read-only `get_order(order_id)`. The gate resolves order from **capture_id server-side** (agent-supplied order ids and prices are ignored), computes the amount, then runs the SAME check/reserve/execute pipeline. `create_refund(amount)` stays available only in the PayPal-plugin hook path; the proxy path ships item-scoped as the primary tool.
+- **D-AP-2:** schema additions: `orders(order_id, capture_id UNIQUE)`, `order_items(order_id, item_id, name, unit_cents, qty, refunded_qty, kind CHECK in ('merchandise'))` (tax, shipping and discount are not agent-selectable); ledger rows record item names, prices and qty. Cumulative refunded qty per item is updated inside the same atomic reservation transaction (anti-structuring).
+- **D-AP-3 (new rules):** R-ITEMS-UNKNOWN (unknown or foreign item id: block), R-ITEMS-ALL (all items or full qty of every line: escalate), R-ITEMS-REFUNDED (already refunded qty: block); amount-based caps still apply to the computed amount.
+- **D-AP-4:** tests: item mapping unit tests; poisoned order id ignored; cumulative structuring across calls; both-completion-order concurrency on item refunds; the LeashBench A/B re-run against the final proxy with the live sandbox.
+- **D-AP-5 (DEFER):** contextual anomaly signals, auto-tuned mandates; **REJECT:** macaroon-style tokens for this hackathon.
+- **D-AP-6:** demo script gains one beat: same ticket, amount-choosing tool vs item-scoped tool, with the measured numbers on screen; the claim wording is restricted per IMPACT.md section 13.
+- **Honest score state:** the independent baseline was Innovation 4/Impact 5; the outside review scores Innovation 7/10 with this feature; neither is a guarantee, and Impact still depends on a real merchant quote and the build.
+
 ## GSTACK REVIEW REPORT
 
 | Review | Trigger | Why | Runs | Status | Findings |

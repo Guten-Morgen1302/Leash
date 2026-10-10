@@ -80,5 +80,8 @@ Add: shadow mode (`LEASH_MODE=shadow`, records would-have decisions, never block
 ## 6d. Judge-driven additions (docs/IMPACT.md sections 10 to 12)
 Add a read-only **/mandate** page that renders mandate.json in plain language for the merchant (a test must prove every field appears). LeashBench harness note: in Claude Code, MCP tools are deferred behind tool search; the benchmark system prompt must tell the agent to load the refund tool with tool search, or results undercount. `scripts/leashbench/` must include the third-party tickets (`docs/reviews/leashbench/tickets-third-party.json`) and the live guarded runner.
 
+## 6e. Headline feature: item-scoped refunds (docs/IMPACT.md section 13, PLAN.md D-AP-1 to D-AP-6)
+Implement `get_order` and `refund_items` in the proxy; the gate resolves the order from capture_id server-side and computes the amount from `order_items`; add rules R-ITEMS-UNKNOWN, R-ITEMS-ALL, R-ITEMS-REFUNDED; track cumulative refunded qty inside the atomic reservation transaction; ledger rows carry item names and prices. Port the prototype `docs/reviews/leashbench/items-mcp.mjs` as the behavioral reference and re-run `bench-items.mjs` against the real proxy. Claims must follow the honest wording in IMPACT.md section 13 (never say the agent cannot over-refund).
+
 ## 7. Stretch (only after Gate 5, in this order, each optional)
 live Gemini ticket box (rate limited, token capped); Playwright e2e as CI job; published head hash for the ledger seal; webhook reconciliation; mandate builder UI. Do NOT add: Docker, other languages, other PayPal tools, dispute/invoice flows (they stay absent from the proxy by design).
