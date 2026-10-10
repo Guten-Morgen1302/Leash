@@ -161,6 +161,18 @@ Process: candidate ideas generated, two feasibility probes run against real syst
 
 **Honest scores (outside reviewer, for this scoped project): Innovation 7, Impact 7.** Not 9+ because each mechanism has precedent elsewhere (the wedge is the combination and the evidence), n is small everywhere, and there is still no real incident. **What would move it:** a cold, un-coached policy written by someone else and compiled correctly; a real-shaped dispute replayed end to end; one permissioned merchant quote. None of those can be produced by editing documents.
 
+## 15. Cold-policy compiler test (2026-10-10): independent authors, messy text, ask-don't-guess
+Setup: a separate Claude instance, blind to the compiler prompt, wrote 10 realistic merchant policies (typos, bullets, rambling, "twenty five bucks", "$1,200", percent-of-order limits, a self-contradicting return window, "refund anything reasonable") plus its own ground truth, with null wherever the policy does not clearly decide a field. The compiler was told: output null and ask a question for any field that is missing, vague, contradictory or not a fixed amount; never guess. Files: reviews/leashbench/cold-policies.json, cold-policy-compile.py.
+| Measure | Result |
+|---|---|
+| Fields scored | 70 (7 per policy, 10 policies) |
+| Correct | **70 of 70** |
+| Genuinely unclear fields in the set | 14 (20%); the compiler returned null for all 14 and asked, **0 guessed** |
+| Over-flagged (asked when the policy was clear) | 0 |
+| Policies fully correct | 10 of 10; parse failures 0 |
+**Limits (state them):** n=10; the author and the compiler are the same model family and the author knew the task, so errors may be correlated and the set is probably easier than real shop-owner text; temperature not pinned in this run; one model; no real merchant wrote any policy. This supersedes the earlier 6 of 6 probe as the headline but is still **feasibility, not proof**. Replace it with a result from policies written by real, un-coached people (planned for week 4) before claiming more.
+**Design consequence:** the compiler's null-and-ask behavior is now a requirement: a null field BLOCKS activation of the mandate until the merchant answers; there is no silent default for an unclear field.
+
 ## 7. Remaining gaps we cannot close by writing
 - **No verified incident of a large injected-refund loss exists**; we say "bounded liability before the first incident".
 - **Merchant demand is unvalidated.** Cheap fix before submission: show the video and README to 2 to 3 real merchants or e-commerce support leads and record one verbatim quote ("would you let an agent refund without this?"). Use a quote only with permission. This is a task for you, not for code.

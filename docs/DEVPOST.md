@@ -52,3 +52,5 @@ See docs/IMPACT.md section 2: only claims marked USE may be published; verify th
 | "6 of 6 policies compiled exactly" | VERIFIED 2026-10-10 as a small feasibility probe (reviews/leashbench/policy-compile-probe.py); say "in a small test"; replace with a cold, outside-written policy result before submission |
 | any claim that Leash blocked a REAL open dispute | NOT VERIFIED: the sandbox dispute lookup returned 200 with no disputes; use a labeled recorded or stubbed dispute unless a real one is created |
 | "tamper-proof" (appeared in the outside review's wording) | BANNED |
+
+| "70 of 70 fields, 10 of 10 messy policies, 0 guessed on 14 unclear fields" | VERIFIED 2026-10-10 (IMPACT.md section 15, reviews/leashbench/cold-policy-compile.py); say "in a small test with independently written policies"; same-model-family and n=10 caveats must stay; replace with real-merchant policies before submission |

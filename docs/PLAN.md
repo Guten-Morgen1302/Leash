@@ -1050,6 +1050,9 @@ Decision record: docs/IMPACT.md section 14; outside review: docs/reviews/outside
 - **Honest scores:** Innovation 7 and Impact 7 for this scope (outside reviewer); not 9+ without a cold outside policy, a real-shaped dispute replay and a merchant quote.
 - **Order and cut line:** W1 state checks, W2 trimmed compiler, W3 shadow mode and pipeline regression, W4 outside validation, freeze about day 26. If time slips, cut the compiler first; never cut item-scoped or state checks.
 
+## Compiler Evidence and Rule (2026-10-10)
+Cold-policy test (IMPACT.md section 15): 70 of 70 fields correct, all 14 unclear fields returned null with a question and none was guessed (n=10, same model family, author knew the task). **New requirement D-V2-8:** the policy compiler must emit null plus a clarifying question for any unclear field, and a mandate with any null field cannot be activated; no silent defaults. Test: a policy with a missing daily limit leaves the mandate inactive until answered.
+
 ## GSTACK REVIEW REPORT
 
 | Review | Trigger | Why | Runs | Status | Findings |
