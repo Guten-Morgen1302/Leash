@@ -1,14 +1,10 @@
 // Loads the already-created sandbox captures (.seed/captures.json) into the Leash DB. Makes NO PayPal calls and never re-seeds PayPal.
 // The $200 demo order gets its five line items; other captures have no item data (item-scoped refunds on them are escalated).
 import { readFileSync } from 'node:fs';
-import { DatabaseSync } from 'node:sqlite';
 const path = process.env.LEASH_DB ?? 'leash.db';
 const caps = JSON.parse(readFileSync('.seed/captures.json', 'utf8'));
-const db = new DatabaseSync(path);
-db.exec(`PRAGMA journal_mode=WAL; PRAGMA busy_timeout=5000;`);
 const { applySchema } = await import('../server/schema.ts');
 const { openDb } = await import('../server/db.ts');
-db.close();
 const d = await openDb(path);
 applySchema(d);
 const ITEMS = [['mug', 'Ceramic mug', 1800], ['cushion', 'Velvet cushion', 4200], ['lamp', 'Desk lamp', 5500], ['towels', 'Towel set', 3500], ['vase', 'Stoneware vase', 5000]];
