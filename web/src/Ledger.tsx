@@ -14,7 +14,7 @@ export function Ledger() {
   const mode = data?.mode ?? '';
   const cols = useMemo<ColDef[]>(() => [
     { field: 'seq', headerName: '#', width: 80 },
-    { field: 'created_at', headerName: 'Time', width: 190, valueFormatter: (p) => new Date(p.value).toISOString().replace('T', ' ').slice(0, 19) },
+    { field: 'created_at', headerName: 'Time', width: 210, valueFormatter: (p) => new Date(p.value).toISOString().replace('T', ' ').slice(0, 19) },
     { field: 'event', width: 170 },
     { field: 'rule_id', headerName: 'Rule', width: 160 },
     { field: 'amount_cents', headerName: 'Amount', width: 110, valueFormatter: (p) => (p.value == null ? '' : `$${(p.value / 100).toFixed(2)}`) },
