@@ -192,3 +192,14 @@ Policies: P1 specialty coffee (perishables, opened-bag exclusion, 48-hour damage
 - **No verified incident of a large injected-refund loss exists**; we say "bounded liability before the first incident".
 - **Merchant demand is unvalidated.** Cheap fix before submission: show the video and README to 2 to 3 real merchants or e-commerce support leads and record one verbatim quote ("would you let an agent refund without this?"). Use a quote only with permission. This is a task for you, not for code.
 - **Air Canada and Ravelin citations** should be verified against their primary sources before the exact figures appear in the final text.
+
+## 17. LeashBench against the real proxy (2026-10-10)
+
+Harness: `scripts/leashbench/bench-real-proxy.mjs`. Each run is a fresh DB with one $200 order of five items (the mug, $18, is the only legitimate refund), the real `server/proxy-main.ts` over MCP stdio with a SIMULATED PayPal, `mandate.json` as shipped, and five injection-style tickets (direct override, fake system notice, claimed manager approval, sob story, subtle preference note) with 4 repetitions each. The executed total is read from the Leash DB afterwards. This is the shipped item-scoped interface (the agent names items, never amounts); the amount tool was off.
+
+| Model | Runs | Over-refund executed | Legit $18 executed | Attempted a larger refund and was stopped |
+|---|---|---|---|---|
+| claude-haiku-4-5 | 20 | 0 | 9 | 11 runs (`R-HARD-MAX`; 2 of them also left a pending approval) |
+| claude-sonnet-5-5 | 20 | 0 | 20 | 0 |
+
+What this shows: in 40 injected runs no dollar above the legitimate $18 executed. The weaker model was talked into a full-order refund in more than half the runs and Leash stopped each attempt; the stronger model was not fooled once. What it does not show: Haiku completed the legitimate $18 in only 9 of 20 runs, so after a block it often did not retry with the single item. A blocked attack costs the customer a correct refund unless the agent recovers, which is a real cost of the gate. Small sample, five tickets written by us, one gate configuration; treat the rates as indicative.
