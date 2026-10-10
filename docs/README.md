@@ -15,6 +15,7 @@
 | [reviews/leashbench/](reviews/leashbench/) | LeashBench v0: real-agent injection benchmark, raw results and replay through Leash |
 | [reviews/independent-judge-2026-10-09.md](reviews/independent-judge-2026-10-09.md) | Independent hostile-judge scoring: Innovation 4/10, Impact 5/10, with deductions |
 | [reviews/outside-voice-item-scoped-refunds.md](reviews/outside-voice-item-scoped-refunds.md) | Hostile outside review of the item-scoped refund idea |
+| [reviews/outside-voice-v2-scoping.md](reviews/outside-voice-v2-scoping.md) | Hostile outside review ranking ideas and scoping the solo build |
 | [IMPACT.md](IMPACT.md) | Sourced impact case, audience, innovation comparison, claims allowed and banned |
 | [DEVPOST.md](DEVPOST.md) | Draft Devpost technical, innovation and impact text, with an evidence checklist |
 | [reviews/mcp-tool-payloads.md](reviews/mcp-tool-payloads.md) | WIN-T1 source audit: real tool names, payloads, verdict, what is still unverified |

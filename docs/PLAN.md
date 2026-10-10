@@ -1038,6 +1038,18 @@ Scope note: the full snapshot-gated autoplan pipeline was NOT run end to end; th
 - **D-AP-6:** demo script gains one beat: same ticket, amount-choosing tool vs item-scoped tool, with the measured numbers on screen; the claim wording is restricted per IMPACT.md section 13.
 - **Honest score state:** the independent baseline was Innovation 4/Impact 5; the outside review scores Innovation 7/10 with this feature; neither is a guarantee, and Impact still depends on a real merchant quote and the build.
 
+## Autoplan Rerun v2 (2026-10-10): AUTHOR, AUTHORIZE, VERIFY (supersedes the previous autoplan addendum's headline)
+Decision record: docs/IMPACT.md section 14; outside review: docs/reviews/outside-voice-v2-scoping.md. Scope note: this is a focused CEO-phase rerun with real feasibility probes, not the snapshot-gated full pipeline.
+- **D-V2-1 (MUST, build first):** PayPal-state verification in `check()`: open-dispute lookup (`GET /v1/customer/disputes?disputed_transaction_id=`; fail closed to ESCALATE when the lookup errors), amount already refunded (existing reservations plus a refunds lookup), capture age vs `returnWindowDays` (from the capture's create time). New rules: R-DISPUTE-OPEN (block), R-WINDOW (block outside window, or escalate if mandate says so), R-STATE-UNAVAILABLE (escalate when PayPal state cannot be read). State reads happen BEFORE the transaction; results are passed into the pure `decide()`; never a network call inside `BEGIN IMMEDIATE`.
+- **D-V2-2 (MUST):** item-scoped tool as in D-AP-1 to D-AP-4 (unchanged).
+- **D-V2-3 (MUST, cheap):** shadow mode with a prevented-loss report (dollars and counts, by rule).
+- **D-V2-4 (STRETCH, trimmed):** policy compiler: `scripts/compile-policy`, temperature 0, schema-whitelisted output, plain-language playback, diff plus explicit re-sign, sign-off set = our hand-authored adversarial tickets plus a few generated boundary tickets. `mandate.json` gains `returnWindowDays`, `blockIfOpenDispute`, `escalateFullOrder`, `schema_version` bump. The compiler uses the Gemini adapter when a key exists and a recorded compile when not (keyless path preserved).
+- **D-V2-5 (CUT):** second-LLM anomaly scoring; multi-tool expansion (roadmap sentence only).
+- **D-V2-6:** demo script gets a 15-second "stale state" beat: refund request on a payment with an open dispute is blocked with R-DISPUTE-OPEN (recorded or stubbed dispute state, labeled), after the item-scoped beat.
+- **D-V2-7 (threat model):** compiler threats T17 (injection through policy text), T18 (misread policy), T19 (drift on recompile) with the mitigations in IMPACT.md section 14 are added to docs/THREAT-MODEL.md.
+- **Honest scores:** Innovation 7 and Impact 7 for this scope (outside reviewer); not 9+ without a cold outside policy, a real-shaped dispute replay and a merchant quote.
+- **Order and cut line:** W1 state checks, W2 trimmed compiler, W3 shadow mode and pipeline regression, W4 outside validation, freeze about day 26. If time slips, cut the compiler first; never cut item-scoped or state checks.
+
 ## GSTACK REVIEW REPORT
 
 | Review | Trigger | Why | Runs | Status | Findings |

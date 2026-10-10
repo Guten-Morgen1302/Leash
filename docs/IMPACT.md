@@ -134,6 +134,33 @@ This also supersedes the earlier lower-bound rates in section 8 for Haiku: with 
 **Honest claim (use this wording):** "Item-scoped refunds turn amount manipulation into a finite, auditable item-selection problem; the existing caps and human approval catch the remaining cases." **Never claim** that the agent cannot over-refund: it can select every item, and what stops it is escalation, not item-scoping alone.
 **Costs and limits to state:** n=20 per arm, one model, tickets authored by us, a stand-in order table; requires the merchant's order data (integration cost; the PayPal refund API takes amounts, so the gate translates items to an amount); the 10 escalated runs show real friction (a legitimate whole-order refund now waits for approval, which is the intended behavior but must be shown honestly); not yet tested against the live PayPal sandbox with real captures.
 
+## 14. Autoplan rerun (2026-10-10): the idea becomes AUTHOR, AUTHORIZE, VERIFY
+Process: candidate ideas generated, two feasibility probes run against real systems, hostile outside review used to rank and cut (reviews/outside-voice-v2-scoping.md). The old framing ("a mandate gate with caps") is replaced by one pipeline.
+
+**Product definition (one sentence, deterministic wording; the words tamper-proof and mathematically stay banned):**
+"Leash turns a merchant's plain-English refund policy into an enforced mandate, forces AI agents to ask for *what* to refund and never *how much*, and checks every request against PayPal's live state (open disputes, refunds already made, purchase age) before money moves."
+| Stage | What it does | Status of evidence |
+|---|---|---|
+| **Author** | Merchant writes the refund policy in plain English; an LLM compiles it **once, at config time**, into a fixed whitelisted schema (no free-form fields, no code); Leash plays it back in plain language, shows a sign-off set of boundary tickets, and requires an explicit re-sign on any change. Runtime stays purely deterministic | Probe: **6 of 6** policies compiled exactly (42 of 42 fields), incl. numbers in words ("twenty-five dollars", "30 bucks"), "ignore disputes", and a conditional full-order rule. **Small n, policies written by us**: feasibility, not proof |
+| **Authorize** | Item-scoped interface: the agent names line items, the gate computes the amount from trusted order data | Measured: agent-chooses-amount over-refunded 14 of 20 (70%); item-scoped 0 of 20 (10 exact, 10 whole-order attempts escalated) |
+| **Verify** | Before reserving money the gate checks live PayPal state: an **open dispute** on the transaction (refunding as well as the dispute outcome risks paying twice), **amount already refunded**, **capture age vs the return window**, and optionally shipment status | Feasibility: PayPal sandbox returned HTTP 200 for `GET /v1/customer/disputes?disputed_transaction_id=` and for shipment trackers (both empty in our sandbox). **Not yet shown blocking a real open dispute**: sandbox dispute creation is limited, so the demo uses a recorded or stubbed dispute state, labeled as such |
+
+**Decisions (outside review, accepted):**
+| Idea | Decision |
+|---|---|
+| C item-scoped interface | MUST-HAVE (done in prototype) |
+| B PayPal-state-aware verification | **MUST-HAVE**, build first (week 1) |
+| D shadow mode | MUST-HAVE, cheap; produces a dollar figure for the no-incident gap |
+| A policy compiler | **STRETCH, trimmed**: compile to schema, plain-language playback, minimal diff and re-sign. CUT the full auto-generated test-UI. Sign-off set mixes in our hand-authored manipulative tickets (non-LLM-authored) so the compiler does not grade its own homework |
+| E second-LLM anomaly score | **CUT**: contradicts the "deterministic gate" pitch |
+| F multi-tool expansion (invoices, disputes) | **CUT**; roadmap sentence only |
+
+**Compiler failure modes and mitigations:** (1) injection through policy text: output constrained to the whitelisted schema, anything else rejected; (2) misreading: plain-language playback plus boundary tickets the merchant must eyeball; (3) drift: temperature 0, pinned model and prompt version, diff old vs new mandate, explicit re-sign; (4) self-graded tests: hand-authored adversarial tickets always included.
+
+**Solo 30-day order (demoable at each step):** W1 state checks (B) with stale-state tickets (open dispute, already refunded, outside window) as tests; W2 trimmed compiler, validated on 1 to 2 policies NOT written by us; W3 shadow mode plus full-pipeline regression; W4 get 2 to 3 outside people to write a real policy cold and run it through the compiler unassisted; code freeze about day 26; buffer last two days.
+
+**Honest scores (outside reviewer, for this scoped project): Innovation 7, Impact 7.** Not 9+ because each mechanism has precedent elsewhere (the wedge is the combination and the evidence), n is small everywhere, and there is still no real incident. **What would move it:** a cold, un-coached policy written by someone else and compiled correctly; a real-shaped dispute replayed end to end; one permissioned merchant quote. None of those can be produced by editing documents.
+
 ## 7. Remaining gaps we cannot close by writing
 - **No verified incident of a large injected-refund loss exists**; we say "bounded liability before the first incident".
 - **Merchant demand is unvalidated.** Cheap fix before submission: show the video and README to 2 to 3 real merchants or e-commerce support leads and record one verbatim quote ("would you let an agent refund without this?"). Use a quote only with permission. This is a task for you, not for code.
