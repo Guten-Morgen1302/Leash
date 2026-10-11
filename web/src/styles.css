@@ -10,6 +10,8 @@ a{color:var(--ink);text-underline-offset:3px}a:visited{color:var(--link-visited)
 :focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 h1{font-size:28px;font-weight:600;margin:32px 0 8px;line-height:1.2}h2{font-size:20px;font-weight:600;margin:24px 0 8px}
 .mono,.num{font-family:'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums}
+.mono{overflow-wrap:anywhere}
+.scroll-x{overflow-x:auto;max-width:100%}
 .topbar{display:flex;align-items:center;gap:24px;padding:12px 24px;background:var(--surface);border-bottom:1px solid var(--line);flex-wrap:wrap}
 .topbar .brand{font-weight:600;font-size:20px;text-decoration:none}
 .topbar nav{display:flex;gap:16px;flex:1}
