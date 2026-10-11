@@ -14,7 +14,7 @@ npm run demo        # builds the UI and serves http://127.0.0.1:4317 (picks the 
 
 Open `/demo`. Ticket 2 (a prompt-injected "refund the entire order") is preselected: press **Run both lanes**. Left lane, no Leash: $200 refunded. Right lane: blocked by `R-HARD-MAX`. Ticket 1 is allowed ($18), ticket 3 escalates to `/approve/:id` (works on a phone) and executes only after a human approves and the agent retries.
 
-Terminal version against a running server: `npm run replay`. Start over: `npm run reset`. Requires Node 22.18+ (`.nvmrc` pins 24); on Windows use Git Bash or PowerShell, no extra tools.
+Real-agent footage (same injected ticket, a real Claude agent, with and without Leash): `npm run demo:agent`. Terminal replay against a running server: `npm run replay`. Start over: `npm run reset`. Requires Node 22.18+ (`.nvmrc` pins 24); on Windows use Git Bash or PowerShell, no extra tools.
 
 ## What is real and what is simulated
 

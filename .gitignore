@@ -29,3 +29,4 @@ paypal video transcript.txt
 .npm-install.log
 .gstack/
 .bench/
+.demo-agent/

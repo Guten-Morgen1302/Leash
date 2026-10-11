@@ -21,7 +21,8 @@
     "doctor": "node scripts/doctor.mjs",
     "hooks:print": "node scripts/print-hooks.mjs",
     "compile-policy": "node --disable-warning=ExperimentalWarning scripts/compile-policy.mjs",
-    "ledger-head": "node --disable-warning=ExperimentalWarning scripts/ledger-head.mjs"
+    "ledger-head": "node --disable-warning=ExperimentalWarning scripts/ledger-head.mjs",
+    "demo:agent": "node --disable-warning=ExperimentalWarning scripts/demo-agent.mjs"
   },
   "dependencies": {
     "@fontsource/ibm-plex-mono": "^5.3.0",
