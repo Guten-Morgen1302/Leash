@@ -62,3 +62,5 @@ See docs/IMPACT.md section 2: only claims marked USE may be published; verify th
 | "Leash compiles a policy into a draft, lists what it cannot enforce, and will not activate with a null field" | VERIFIED as a CLI (`npm run compile-policy`, tests/compiler-head.test.ts, IMPACT.md section 19). There is no compiler UI. The handmade-policy window came back 30 while the policy has a 30 to 45 day fee window: say so if asked |
 | "published ledger head" | VERIFIED as a script and a page element (`npm run ledger-head`); it only helps if the pair is published where the DB owner cannot edit it. Do not call the ledger tamper-proof |
 | "browser end-to-end tests" | VERIFIED (tests/e2e/demo.e2e.test.ts); skipped without a Chromium |
+| "after a block the agent still completes the legitimate refund" | VERIFIED 2026-10-11 (IMPACT.md section 20): Haiku 4.5 18 of 20 with recovery guidance vs 9 of 20 before; $0 over in all 40 benchmark runs in both the 20-run set before the change and the 20-run set after it |
+| "AUTHOR page, live proof page" | VERIFIED as UI (tests/author-proof.test.ts); recorded compile when no key |

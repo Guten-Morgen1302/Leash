@@ -5,6 +5,8 @@ import { Demo } from './Demo';
 import { Approve } from './Approve';
 import { Ledger } from './Ledger';
 import { Mandate } from './Mandate';
+import { Author } from './Author';
+import { Proof } from './Proof';
 import { ModeChip } from './ui';
 
 function App() {
@@ -20,6 +22,8 @@ function App() {
   if (p.startsWith('/approve/')) page = <Approve actionId={p.split('/')[2] ?? ''} />;
   else if (p === '/ledger') page = <Ledger />;
   else if (p === '/mandate') page = <Mandate />;
+  else if (p === '/author') page = <Author />;
+  else if (p === '/proof') page = <Proof />;
   else page = <Demo />;
   return (
     <>
@@ -28,7 +32,9 @@ function App() {
         <nav aria-label="Main">
           <a href="/demo" aria-current={cur('/demo')} onClick={go('/demo')}>Demo</a>
           <a href="/ledger" aria-current={cur('/ledger')} onClick={go('/ledger')}>Ledger</a>
+          <a href="/author" aria-current={cur('/author')} onClick={go('/author')}>Author</a>
           <a href="/mandate" aria-current={cur('/mandate')} onClick={go('/mandate')}>Mandate</a>
+          <a href="/proof" aria-current={cur('/proof')} onClick={go('/proof')}>Proof</a>
         </nav>
         <ModeChip />
       </header>

@@ -1,0 +1,8 @@
+{
+  "note": "Recorded results of real PayPal sandbox refunds made through Leash (2026-10-10). Amounts are sandbox money. Leash re-reads each refund from PayPal when it has sandbox credentials.",
+  "refunds": [
+    { "refund_id": "47D274932J5570911", "capture_id": "8FW26565SY606043R", "amount": "18.00", "currency": "USD", "via": "gate (item refund, R-ALLOW)" },
+    { "refund_id": "26M005515G1074736", "capture_id": "28J85400YN748233Y", "amount": "18.00", "currency": "USD", "via": "real proxy over MCP stdio; the full-order attempt on the same capture was blocked by R-HARD-MAX" },
+    { "refund_id": "4CV94937AN1035525", "capture_id": "75H00694GN1963710", "amount": "1.00", "currency": "USD", "via": "PayPal hosted MCP create_refund (not gated; connectivity re-test)" }
+  ]
+}

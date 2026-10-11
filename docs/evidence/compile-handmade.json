@@ -1,0 +1,52 @@
+{
+  "fields": {
+    "perActionCapCents": null,
+    "hardMaxCents": null,
+    "dailyCapCents": null,
+    "hardDailyCapCents": null,
+    "returnWindowDays": 30,
+    "blockIfOpenDispute": null,
+    "escalateFullOrder": null
+  },
+  "questions": [
+    "What is the perActionCapCents?",
+    "What is the hardMaxCents?",
+    "What is the dailyCapCents?",
+    "What is the hardDailyCapCents?",
+    "What is the blockIfOpenDispute?",
+    "What is the escalateFullOrder?",
+    "What is the maximum refund amount (in cents) an AI agent can issue per action?",
+    "What is the absolute maximum refund amount (in cents) allowed even with approval?",
+    "What is the rolling 24-hour refund cap (in cents) for the AI agent?",
+    "What is the hard rolling 24-hour total refund cap (in cents)?",
+    "Should refunds be blocked if there is an open dispute?",
+    "Should full order refund requests be automatically escalated?",
+    "What is the maximum refund amount (perActionCapCents) an AI agent can issue alone?",
+    "What is the absolute maximum refund amount (hardMaxCents) allowed even with approval?",
+    "What is the daily rolling cap (dailyCapCents) for refunds issued by the AI agent?",
+    "What is the hard daily limit (hardDailyCapCents) for all refunds combined?",
+    "Should refunds be blocked if there is an open dispute (blockIfOpenDispute)?",
+    "Should full order refund requests be escalated automatically (escalateFullOrder)?",
+    "What is the maximum refund amount (perActionCapCents) an AI agent can issue independently?",
+    "What is the absolute maximum refund limit (hardMaxCents) permitted with approval?",
+    "What is the rolling 24-hour total refund cap (dailyCapCents) for the agent?",
+    "What is the hard rolling 24-hour total refund cap (hardDailyCapCents)?",
+    "Should full order refund requests always be escalated (escalateFullOrder)?"
+  ],
+  "unsupported": [
+    "Personalized/custom items non-refundable once production starts",
+    "Returns between 30 and 45 days incur a 15% restocking fee",
+    "Returns after 45 days are rejected",
+    "Non-refundable shipping fees",
+    "Damaged item handling requiring photo evidence for partial refund or fix",
+    "Personalized/custom items are non-refundable once production starts",
+    "15% restocking fee for returns requested between 30 and 45 days",
+    "Photo required and partial refund/fix for damaged items",
+    "Custom and personalized items are non-refundable once production starts",
+    "15% restocking fee for returns between 30 and 45 days",
+    "Hard rejection cutoff after 45 days",
+    "Damaged item protocol requiring photo evidence and partial refunds"
+  ],
+  "runs": 3,
+  "disagreements": []
+}

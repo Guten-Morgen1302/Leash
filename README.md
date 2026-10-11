@@ -34,9 +34,13 @@ Terminal version against a running server: `npm run replay`. Start over: `npm ru
 
 Limits live in [mandate.json](mandate.json), rendered in plain language at `/mandate`. A missing or null limit makes the mandate invalid: Leash does not guess. Rules are listed in [docs/policy.md](docs/policy.md).
 
+## How Leash differs from other agent-payment gates
+
+Most entries share one principle: the AI proposes, deterministic rules move money. Leash's ground is narrower: **refunds**, where the agent names *items* and never an amount (Leash computes it from trusted order data), the agent never holds the PayPal credential (MCP proxy), and every claim has a benchmark you can rerun. See [docs/COMPETITIVE.md](docs/COMPETITIVE.md).
+
 ## Evidence
 
-[docs/IMPACT.md](docs/IMPACT.md): LeashBench (`scripts/leashbench/`), item-scoped A/B (agent-chooses-amount 70% over-refund vs item-scoped 0%), policy-compiler tests. [docs/THREAT-MODEL.md](docs/THREAT-MODEL.md) says what Leash does not protect against.
+Pages: `/demo`, `/ledger`, `/author` (policy to draft, with what is NOT enforced), `/mandate`, `/proof` (real sandbox refunds). [docs/IMPACT.md](docs/IMPACT.md): LeashBench (`scripts/leashbench/`), item-scoped A/B (agent-chooses-amount 70% over-refund vs item-scoped 0%), policy-compiler tests. [docs/THREAT-MODEL.md](docs/THREAT-MODEL.md) says what Leash does not protect against.
 
 ## What this is not
 

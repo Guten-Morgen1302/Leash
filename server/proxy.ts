@@ -8,10 +8,14 @@ import { toCents } from './paypal.ts';
 
 const reply = (obj: object, isError = false) => ({ content: [{ type: 'text' as const, text: JSON.stringify(obj) }], isError });
 
+// Recovery guidance: a block must not cost the customer a correct refund. It names no limit and offers no workaround past the gate:
+// the retry is still checked, so it can only ever refund items the order data says are refundable and the mandate allows.
+const NEXT_BLOCKED = 'Nothing was refunded. Do not retry the same request. If the customer reported specific faulty items, call get_order and refund_items for ONLY those items; anything beyond that needs a human, so tell the customer it has been passed on.';
+
 const present = (o: GateOutcome) => {
   switch (o.status) {
     case 'executed': return reply({ status: 'executed', refund_id: o.refundId, amount: (o.amountCents / 100).toFixed(2), rule_id: o.ruleId, action_id: o.actionId, mode: o.mode });
-    case 'blocked': return reply({ status: 'blocked', rule_id: o.ruleId, reason: o.reason, action_id: o.actionId, doc_url: `docs/policy.md#${o.ruleId.toLowerCase()}` }, true);
+    case 'blocked': return reply({ status: 'blocked', rule_id: o.ruleId, reason: o.reason, action_id: o.actionId, doc_url: `docs/policy.md#${o.ruleId.toLowerCase()}`, next: NEXT_BLOCKED }, true);
     case 'pending_approval': return reply({ status: 'pending_approval', rule_id: o.ruleId, reason: o.reason, approval_url: o.approvalUrl, next: 'A human must approve at the link, then call the same tool again with the same arguments.' }, true);
     case 'execution_failed': return reply({ status: 'execution_failed', reason: o.reason, ...(o.debugId ? { paypal_debug_id: o.debugId } : {}), action_id: o.actionId }, true);
     case 'unknown_outcome': return reply({ status: 'unknown_outcome', reason: o.reason, action_id: o.actionId }, true);
