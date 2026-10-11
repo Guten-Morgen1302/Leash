@@ -22,6 +22,7 @@ const eq = (a: string, b: string): boolean => {
 export interface AppOptions {
   token?: string | undefined; // LEASH_TOKEN; REQUIRED in production for the hook endpoints
   production?: boolean;
+  trustProxy?: number | boolean; // number of proxy hops in front (LEASH_TRUST_PROXY); default none
   rateLimitPerMin?: number;
   demoRunsPerMin?: number;
   fetchImpl?: typeof fetch; // tests
@@ -30,7 +31,7 @@ export interface AppOptions {
 
 export function createApp(d: GateDeps, o: AppOptions = {}): express.Express {
   const app = express();
-  app.set('trust proxy', 1); // per-IP limits key on the real client behind a proxy
+  app.set('trust proxy', o.trustProxy ?? false); // only honor X-Forwarded-For when a proxy is configured: otherwise any client could pick its own rate-limit key
   app.disable('x-powered-by');
   app.use(express.json({ limit: '16kb' }));
 
@@ -38,6 +39,12 @@ export function createApp(d: GateDeps, o: AppOptions = {}): express.Express {
   const api = express.Router();
   api.use(rateLimit(o.rateLimitPerMin ?? 240));
   api.use('/demo/run', rateLimit(o.demoRunsPerMin ?? 30));
+  // /v1/refund moves real (sandbox) money when PayPal credentials are present: same bearer token, and disabled (503) if none is configured
+  api.use('/refund', (req: Request, res: Response, next: NextFunction) => {
+    if (!d.paypal) return next();
+    if (!o.token) return void res.status(503).json({ error: 'live refunds disabled: LEASH_TOKEN not set' });
+    eq(req.get('authorization') ?? '', `Bearer ${o.token}`) ? next() : void res.status(401).json({ error: 'unauthorized' });
+  });
   // hook endpoints: bearer token; FAIL CLOSED (503) if unset in production
   api.use(['/check', '/result'], (req: Request, res: Response, next: NextFunction) => {
     if (!o.token) return o.production ? void res.status(503).json({ error: 'hook endpoints disabled: LEASH_TOKEN not set' }) : next();
@@ -81,7 +88,7 @@ export function createApp(d: GateDeps, o: AppOptions = {}): express.Express {
   api.get('/ledger', (req, res) => {
     const limit = Math.min(Math.max(Number(req.query.limit ?? 100) || 100, 1), 500);
     const offset = Math.max(Number(req.query.offset ?? 0) || 0, 0);
-    const rows = d.db.all('SELECT l.seq, l.action_id, l.event, l.payload_json, l.hash, l.created_at, a.rule_id, a.amount_cents, a.decision FROM ledger l LEFT JOIN actions a ON a.id=l.action_id ORDER BY l.seq DESC LIMIT ? OFFSET ?', limit, offset);
+    const rows = d.db.all('SELECT l.seq, l.action_id, l.event, l.hash, l.created_at, a.rule_id, a.amount_cents, a.decision FROM ledger l LEFT JOIN actions a ON a.id=l.action_id ORDER BY l.seq DESC LIMIT ? OFFSET ?', limit, offset);
     res.json({ rows, total: d.db.val<number>('SELECT COUNT(*) FROM ledger') ?? 0, chain: verifyChain(d.db), mode: d.paypal ? 'LIVE-FIRE' : 'SIMULATED' });
   });
   api.get('/mandate', (_req, res) => res.json({ lines: describeMandate(d.mandate), mandate: d.mandate }));
