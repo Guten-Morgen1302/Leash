@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 export async function api<T = any>(path: string, body?: unknown): Promise<T> {
   const r = await fetch(path, body === undefined ? undefined : { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
   const j = await r.json().catch(() => ({}));
-  if (!r.ok && !('ok' in j) && !('status' in j)) throw Object.assign(new Error(j.why ?? j.error ?? `HTTP ${r.status}`), { status: r.status, body: j });
+  if (!r.ok && !('ok' in j) && !('status' in j)) throw Object.assign(new Error(j.fix ?? j.why ?? j.error ?? `HTTP ${r.status}`), { status: r.status, body: j });
   return j;
 }
 

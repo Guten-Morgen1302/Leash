@@ -82,4 +82,18 @@ describe('browser e2e', { skip: exe ? false : 'no Chromium found (set LEASH_CHRO
     await page.getByText(/The agent may refund up to \$50\.00 on its own/).waitFor();
     assert.deepEqual(errors.filter((e) => /license|ag-grid/i.test(e)), []);
   });
+  test('phone width: no page scrolls sideways, and /author explains why own-text compile is unavailable', async () => {
+    const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } }); const page = await ctx.newPage();
+    await fetch(BASE + '/v1/demo/run', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ ticketId: 2 }) });
+    for (const p of ['/demo', '/ledger', '/author', '/mandate', '/proof']) {
+      await page.goto(BASE + p); await page.waitForLoadState('networkidle');
+      const w = await page.evaluate('[document.documentElement.scrollWidth, window.innerWidth]') as number[]; // string form: tests are typed without the DOM lib
+      assert.ok(w[0] <= w[1], `${p} is ${w[0]}px wide in a ${w[1]}px viewport`);
+    }
+    await page.goto(BASE + '/author');
+    await page.getByLabel('Policy text').fill('Refund anything under 20 dollars');
+    await page.getByRole('button', { name: 'Compile draft' }).click();
+    await page.getByText(/needs GEMINI_API_KEY/).waitFor();
+    await ctx.close();
+  });
 });
