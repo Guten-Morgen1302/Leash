@@ -10,6 +10,9 @@ import { toCents } from './paypal.ts';
 import { BOOT_ID, demoRouter, tickets } from './demo.ts';
 import { aiSummary } from './llm.ts';
 import { rateLimit } from './ratelimit.ts';
+import { compilePolicy, FIELDS } from './compiler.ts';
+import { askGemini } from './llm.ts';
+import { readFileSync } from 'node:fs';
 
 const eq = (a: string, b: string): boolean => {
   const x = Buffer.from(a), y = Buffer.from(b);
@@ -19,9 +22,11 @@ const eq = (a: string, b: string): boolean => {
 export interface AppOptions {
   token?: string | undefined; // LEASH_TOKEN; REQUIRED in production for the hook endpoints
   production?: boolean;
+  trustProxy?: number | boolean; // number of proxy hops in front (LEASH_TRUST_PROXY); default none
   rateLimitPerMin?: number;
   demoRunsPerMin?: number;
   fetchImpl?: typeof fetch; // tests
+  askImpl?: (prompt: string) => Promise<string>; // tests
   lockOperatorEndpoints?: boolean; // LEASH_LOCK_OPERATOR_ENDPOINTS=1: require the bearer token on /ledger and /exposure too.
   // Off by default so the public demo's own transparency feature (anyone can watch the hash chain) keeps working unauthenticated.
   // /approval/:id and POST /approve stay public regardless: that flow is designed for a human clicking an emailed link with no login,
@@ -30,7 +35,7 @@ export interface AppOptions {
 
 export function createApp(d: GateDeps, o: AppOptions = {}): express.Express {
   const app = express();
-  app.set('trust proxy', 1); // per-IP limits key on the real client behind a proxy
+  app.set('trust proxy', o.trustProxy ?? false); // only honor X-Forwarded-For when a proxy is configured: otherwise any client could pick its own rate-limit key
   app.disable('x-powered-by');
   app.use(express.json({ limit: '16kb' }));
 
@@ -38,6 +43,12 @@ export function createApp(d: GateDeps, o: AppOptions = {}): express.Express {
   const api = express.Router();
   api.use(rateLimit(o.rateLimitPerMin ?? 240));
   api.use('/demo/run', rateLimit(o.demoRunsPerMin ?? 30));
+  // /v1/refund moves real (sandbox) money when PayPal credentials are present: same bearer token, and disabled (503) if none is configured
+  api.use('/refund', (req: Request, res: Response, next: NextFunction) => {
+    if (!d.paypal) return next();
+    if (!o.token) return void res.status(503).json({ error: 'live refunds disabled: LEASH_TOKEN not set' });
+    eq(req.get('authorization') ?? '', `Bearer ${o.token}`) ? next() : void res.status(401).json({ error: 'unauthorized' });
+  });
   // hook endpoints: bearer token; FAIL CLOSED (503) if unset in production
   api.use(['/check', '/result'], (req: Request, res: Response, next: NextFunction) => {
     if (!o.token) return o.production ? void res.status(503).json({ error: 'hook endpoints disabled: LEASH_TOKEN not set' }) : next();
@@ -88,7 +99,7 @@ export function createApp(d: GateDeps, o: AppOptions = {}): express.Express {
   api.get('/ledger', (req, res) => {
     const limit = Math.min(Math.max(Number(req.query.limit ?? 100) || 100, 1), 500);
     const offset = Math.max(Number(req.query.offset ?? 0) || 0, 0);
-    const rows = d.db.all('SELECT l.seq, l.action_id, l.event, l.payload_json, l.hash, l.created_at, a.rule_id, a.amount_cents, a.decision FROM ledger l LEFT JOIN actions a ON a.id=l.action_id ORDER BY l.seq DESC LIMIT ? OFFSET ?', limit, offset);
+    const rows = d.db.all('SELECT l.seq, l.action_id, l.event, l.hash, l.created_at, a.rule_id, a.amount_cents, a.decision FROM ledger l LEFT JOIN actions a ON a.id=l.action_id ORDER BY l.seq DESC LIMIT ? OFFSET ?', limit, offset);
     res.json({ rows, total: d.db.val<number>('SELECT COUNT(*) FROM ledger') ?? 0, chain: verifyChain(d.db), mode: d.paypal ? 'LIVE-FIRE' : 'SIMULATED' });
   });
   api.get('/mandate', (_req, res) => res.json({ lines: describeMandate(d.mandate), mandate: d.mandate }));
@@ -96,6 +107,43 @@ export function createApp(d: GateDeps, o: AppOptions = {}): express.Express {
     const sid = String(req.query.sessionId ?? '');
     const spent = d.db.val<number>(`SELECT COALESCE(SUM(amount_cents),0) FROM actions WHERE session_id=? AND created_at>=? AND status IN ('reserved','executed','approved_executed','unknown_outcome')`, sid, Date.now() - 86_400_000) ?? 0;
     res.json({ spentCents: spent, hardDailyCapCents: d.mandate.hardDailyCapCents, ...preventedLoss(d.db) });
+  });
+  // AUTHOR step: plain-English policy -> DRAFT with plain-language playback. Never activates anything (activation is a deliberate CLI step that refuses while any field is null).
+  const SAMPLES = ['coffee', 'apparel', 'handmade'];
+  const playback = (f: Record<string, number | boolean | null>): string[] => {
+    const usd = (c: unknown) => `$${(Number(c) / 100).toFixed(2)}`;
+    const line = (k: string, text: (v: any) => string, name: string) => (f[k] == null ? `NOT SET: ${name}. Leash will not guess; answer this before activating.` : text(f[k]));
+    return [
+      line('perActionCapCents', (v) => `The agent may refund up to ${usd(v)} on its own.`, 'agent limit per refund'),
+      line('hardMaxCents', (v) => `Nothing above ${usd(v)} is ever refunded, even with approval.`, 'absolute maximum refund'),
+      line('dailyCapCents', (v) => `In 24 hours the agent alone may refund up to ${usd(v)}.`, 'daily limit'),
+      line('hardDailyCapCents', (v) => `The absolute 24-hour limit is ${usd(v)}.`, 'absolute daily limit'),
+      line('returnWindowDays', (v) => `Refunds are refused after ${v} days.`, 'return window'),
+      line('blockIfOpenDispute', (v) => (v ? 'Refunds are refused while the payment has an open dispute.' : 'Open disputes do not block refunds.'), 'open-dispute rule'),
+      line('escalateFullOrder', (v) => (v ? 'Refunding every item of an order needs a person.' : 'Full-order refunds do not need a person.'), 'full-order rule'),
+    ];
+  };
+  const author = express.Router();
+  author.get('/samples', (_q, res) => res.json({ samples: SAMPLES.map((n) => ({ id: n, policy: readFileSync(`docs/evidence/policy-${n}.txt`, 'utf8') })), live: !!process.env.GEMINI_API_KEY }));
+  author.post('/compile', rateLimit(5), async (req, res) => {
+    const policy = typeof req.body?.policy === 'string' ? req.body.policy.slice(0, 4000) : '';
+    const sample = typeof req.body?.sample === 'string' ? req.body.sample : '';
+    if (!policy.trim() && !SAMPLES.includes(sample)) return void res.status(400).json({ error: 'invalid_input', fix: 'Send the policy text.' });
+    let draft; let source = 'live';
+    if (process.env.GEMINI_API_KEY && policy.trim()) draft = await compilePolicy(policy, (p) => (o.askImpl ?? askGemini)(p));
+    else if (SAMPLES.includes(sample)) { draft = JSON.parse(readFileSync(`docs/evidence/compile-${sample}.json`, 'utf8')); source = 'recorded'; }
+    else return void res.status(503).json({ error: 'no_model', fix: 'Compiling your own text needs GEMINI_API_KEY on the server. Pick one of the sample policies to see a recorded compile.' });
+    res.json({ source, runs: draft.runs, disagreements: draft.disagreements, fields: draft.fields, playback: playback(draft.fields), unsupported: draft.unsupported.slice(0, 40), questions: draft.questions.slice(0, 40), activatable: FIELDS.filter((k) => ['perActionCapCents', 'hardMaxCents', 'dailyCapCents', 'hardDailyCapCents'].includes(k)).every((k) => draft.fields[k] != null) });
+  });
+  api.use('/author', author);
+  // recorded live-sandbox proof; re-read from PayPal when this server has sandbox credentials
+  api.get('/proof', async (_req, res) => {
+    const rec = JSON.parse(readFileSync('docs/evidence/live-sandbox.json', 'utf8'));
+    const refunds = await Promise.all(rec.refunds.map(async (r: any) => {
+      if (!d.paypal) return { ...r, live: null };
+      try { const g = await d.paypal.getRefund(r.refund_id); return { ...r, live: { status: g.status, amount: g.amount?.value } }; } catch { return { ...r, live: { status: 'unavailable' } }; }
+    }));
+    res.json({ note: rec.note, mode: d.paypal ? 'LIVE-FIRE' : 'SIMULATED', refunds });
   });
   api.use('/demo', demoRouter(d));
   // read-only data for the approval page (the token is never needed or returned here)

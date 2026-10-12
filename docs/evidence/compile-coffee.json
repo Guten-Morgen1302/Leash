@@ -1,0 +1,53 @@
+{
+  "fields": {
+    "perActionCapCents": null,
+    "hardMaxCents": null,
+    "dailyCapCents": null,
+    "hardDailyCapCents": null,
+    "returnWindowDays": 14,
+    "blockIfOpenDispute": null,
+    "escalateFullOrder": null
+  },
+  "questions": [
+    "What is the perActionCapCents?",
+    "What is the hardMaxCents?",
+    "What is the dailyCapCents?",
+    "What is the hardDailyCapCents?",
+    "What is the blockIfOpenDispute?",
+    "What is the escalateFullOrder?",
+    "What is the maximum refund amount an AI agent can issue alone (perActionCapCents)?",
+    "What is the absolute maximum refund amount allowed, even with approval (hardMaxCents)?",
+    "What is the rolling 24-hour daily refund cap for an AI agent (dailyCapCents)?",
+    "What is the hard rolling 24-hour daily refund cap (hardDailyCapCents)?",
+    "Should refunds be blocked if there is an open dispute (blockIfOpenDispute)?",
+    "Should full order refund requests be escalated automatically (escalateFullOrder)?",
+    "What is the maximum refund amount (perActionCapCents) an AI agent may issue without escalation?",
+    "What is the absolute maximum refund limit (hardMaxCents) permitted with approval?",
+    "What is the daily rolling refund cap (dailyCapCents) for the agent?",
+    "What is the hard daily limit (hardDailyCapCents) on total refunds across a rolling 24-hour period?",
+    "Should refunds be blocked if there is an open dispute or chargeback on the order?",
+    "Should full order refund requests automatically escalate to human review?",
+    "What is the maximum refund amount (perActionCapCents) an AI agent can issue independently?",
+    "What is the absolute maximum refund amount (hardMaxCents) permitted, even with approval?",
+    "What is the rolling 24-hour refund limit (dailyCapCents) for the agent?",
+    "What is the absolute hard daily limit (hardDailyCapCents) across a rolling 24-hour period?",
+    "Should refunds be blocked if there is an open dispute on the transaction?",
+    "Should full order refunds automatically escalate for human review?"
+  ],
+  "unsupported": [
+    "No returns on opened coffee bags unless damaged in transit or incorrect roast",
+    "Damaged items require photo proof emailed within 48 hours for replacement or refund",
+    "Customer pays return shipping for change-of-mind returns",
+    "No returns on opened coffee bags unless damaged or incorrect item sent",
+    "Damaged item reporting deadline within 48 hours with required photo proof",
+    "Option for replacement instead of refund for broken items",
+    "Customer pays return shipping postage for change-of-mind returns",
+    "No returns on opened bags of coffee unless damaged in transit or incorrect roast",
+    "Return window applies specifically to unopened bags, mugs, and brewing gear",
+    "48-hour photo reporting requirement for items broken on arrival",
+    "Customer covers return postage for change-of-mind returns",
+    "Option to ship a replacement instead of a refund for broken items"
+  ],
+  "runs": 3,
+  "disagreements": []
+}

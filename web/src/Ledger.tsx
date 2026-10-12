@@ -26,8 +26,9 @@ export function Ledger() {
       <h1>Ledger</h1>
       {err && <div className="banner error" role="alert">Could not load the ledger: {err} <button className="btn secondary" onClick={load}>Retry</button></div>}
       {data && <p className="row"><span className={`chip ${data.chain.ok ? 'allow' : 'block'}`}><span aria-hidden="true">{data.chain.ok ? '✓' : '✕'}</span>{data.chain.ok ? 'Chain verified' : 'Chain BROKEN'}</span><span className="num">{data.total} entries</span><span className="muted">Hash-chained; tamper-evident against partial edits.</span></p>}
+      {data?.chain.ok && <p className="mono" aria-label="Head hash">Head after {data.chain.rows} rows: {data.chain.head}</p>}
       {data && data.total === 0 && <div className="banner">No decisions yet. Run a ticket on the Demo page.</div>}
-      {data && <div style={{ height: 480 }}><AgGridReact theme={theme} rowData={data.rows} columnDefs={cols} /></div>}
+      {data && <div className="scroll-x" style={{ height: 480 }}><AgGridReact theme={theme} rowData={data.rows} columnDefs={cols} /></div>}
       {!data && !err && <p className="muted">Loading ledger...</p>}
     </>
   );

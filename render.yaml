@@ -10,6 +10,8 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
+      - key: LEASH_TRUST_PROXY
+        value: "1"
       - key: LEASH_DB
         value: /tmp/leash.db
       - key: LEASH_PUBLIC_URL

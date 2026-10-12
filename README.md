@@ -14,15 +14,15 @@ npm run demo        # builds the UI and serves http://127.0.0.1:4317 (picks the 
 
 Open `/demo`. Ticket 2 (a prompt-injected "refund the entire order") is preselected: press **Run both lanes**. Left lane, no Leash: $200 refunded. Right lane: blocked by `R-HARD-MAX`. Ticket 1 is allowed ($18), ticket 3 escalates to `/approve/:id` (works on a phone) and executes only after a human approves and the agent retries.
 
-Terminal version against a running server: `npm run replay`. Start over: `npm run reset`. Requires Node 22.18+ (`.nvmrc` pins 24); on Windows use Git Bash or PowerShell, no extra tools.
+Real-agent footage (same injected ticket, a real Claude agent, with and without Leash): `npm run demo:agent`. Terminal replay against a running server: `npm run replay`. Start over: `npm run reset`. Requires Node 22.18+ (`.nvmrc` pins 24); on Windows use Git Bash or PowerShell, no extra tools.
 
 ## What is real and what is simulated
 
 | Part | Status |
 |---|---|
-| Policy engine, reserve-then-execute transaction, approvals, ledger hash chain, item-scoped refunds, hooks, MCP proxy | Real code, tested (85 tests, both SQLite drivers; 40 injected benchmark runs against the real proxy, 0 dollars over the legitimate refund: docs/IMPACT.md section 17) |
+| Policy engine, reserve-then-execute transaction, approvals, ledger hash chain, item-scoped refunds, hooks, MCP proxy | Real code, tested (tests on both SQLite drivers; 40 injected benchmark runs against the real proxy, 0 dollars over the legitimate refund: docs/IMPACT.md section 17) |
 | Demo page | **SIMULATED**: fake captures, the final PayPal call is a stub (`SIM-` refund ids). Everything before that call is the real gate. |
-| LIVE-FIRE | Set `PAYPAL_CLIENT_ID` and `PAYPAL_CLIENT_SECRET` (sandbox app). One live run is recorded: an $18 item refund executed and confirmed by an independent GET at PayPal (`scripts/gate2-live.mjs`). The hosted PayPal MCP `create_refund` errored in our tests; the local `@paypal/mcp` works. |
+| LIVE-FIRE | Set `PAYPAL_CLIENT_ID` and `PAYPAL_CLIENT_SECRET` (sandbox app). One live run is recorded: an $18 item refund executed and confirmed by an independent GET at PayPal (`scripts/gate2-live.mjs`). PayPal's hosted MCP `create_refund` errored on 2026-10-08 and worked on 2026-10-10 (a $1.00 sandbox refund); the local `@paypal/mcp` works too. |
 | AI summary on the approval page | Advisory only; fixed template when `GEMINI_API_KEY` is unset or Gemini is slow. The gate never reads it. |
 
 ## Two ways to put it in front of an agent
@@ -34,9 +34,13 @@ Terminal version against a running server: `npm run replay`. Start over: `npm ru
 
 Limits live in [mandate.json](mandate.json), rendered in plain language at `/mandate`. A missing or null limit makes the mandate invalid: Leash does not guess. Rules are listed in [docs/policy.md](docs/policy.md).
 
+## How Leash differs from other agent-payment gates
+
+Most entries share one principle: the AI proposes, deterministic rules move money. Leash's ground is narrower: **refunds**, where the agent names *items* and never an amount (Leash computes it from trusted order data), the agent never holds the PayPal credential (MCP proxy), and every claim has a benchmark you can rerun. See [docs/COMPETITIVE.md](docs/COMPETITIVE.md).
+
 ## Evidence
 
-[docs/IMPACT.md](docs/IMPACT.md): LeashBench (`scripts/leashbench/`), item-scoped A/B (agent-chooses-amount 70% over-refund vs item-scoped 0%), policy-compiler tests. [docs/THREAT-MODEL.md](docs/THREAT-MODEL.md) says what Leash does not protect against.
+Pages: `/demo`, `/ledger`, `/author` (policy to draft, with what is NOT enforced), `/mandate`, `/proof` (real sandbox refunds). [docs/IMPACT.md](docs/IMPACT.md): LeashBench (`scripts/leashbench/`), item-scoped A/B (agent-chooses-amount 70% over-refund vs item-scoped 0%), policy-compiler tests. [docs/THREAT-MODEL.md](docs/THREAT-MODEL.md) says what Leash does not protect against.
 
 ## What this is not
 
