@@ -20,7 +20,7 @@ const id = process.env.PAYPAL_CLIENT_ID, secret = process.env.PAYPAL_CLIENT_SECR
 const paypal = id && secret ? new PayPalClient({ baseUrl: process.env.PAYPAL_BASE_URL ?? 'https://api-m.sandbox.paypal.com', clientId: id, clientSecret: secret }) : null;
 const port = Number(process.env.PORT ?? 4317);
 const publicUrl = process.env.LEASH_PUBLIC_URL ?? `http://127.0.0.1:${port}`;
-const app = createApp({ db, mandate: mandate!, paypal, publicUrl }, { token: process.env.LEASH_TOKEN, production });
+const app = createApp({ db, mandate: mandate!, paypal, publicUrl }, { token: process.env.LEASH_TOKEN, production, lockOperatorEndpoints: process.env.LEASH_LOCK_OPERATOR_ENDPOINTS === '1' });
 if (existsSync('web/dist')) {
   app.use(express.static('web/dist'));
   app.get(/^\/(?!v1\/).*/, (_req, res) => void res.sendFile('index.html', { root: 'web/dist' }));

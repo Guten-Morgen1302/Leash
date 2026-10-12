@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { openDb } from '../server/db.ts';
 import { applySchema } from '../server/schema.ts';
-import { check, result, approve, preventedLoss } from '../server/dispatch.ts';
+import { check, result, approve, preventedLoss, sweep } from '../server/dispatch.ts';
 import { verifyChain } from '../server/ledger.ts';
 
 const DAY = 86_400_000;
@@ -120,6 +120,21 @@ for (const driver of ['better-sqlite3', 'node:sqlite'] as const)
       assert.equal(db.val(`SELECT COUNT(*) FROM approvals`), 0, 'shadow creates no approvals');
       const rep = preventedLoss(db);
       assert.deepEqual({ block: rep.wouldBlockCents, esc: rep.wouldEscalateCents, n: rep.actions }, { block: 18000, esc: 7500, n: 3 });
+      assert.equal(verifyChain(db).ok, true);
+    });
+    test('F1: a second request for the same unit cannot escalate while the first is pending; a stale escalation self-expires and frees it', async () => {
+      const db = await mk(driver);
+      seedOrder(db, 'C'); // lamp is $55: above perActionCapCents ($50), so a single-item refund escalates (R-ACTION-CAP)
+      const now = Date.now();
+      const first = check(db, base, I('f1', 'C', [{ itemId: 'lamp', qty: 1 }]), now);
+      assert.equal(first.status, 'pending_approval');
+      const second = check(db, base, I('f2', 'C', [{ itemId: 'lamp', qty: 1 }]), now);
+      assert.equal(second.status, 'blocked', 'the lamp is already held by a pending approval, so a second escalation must not also go out');
+      assert.equal(second.ruleId, 'R-ITEMS-REFUNDED');
+      sweep(db, now + 16 * 60_000); // past the approval's 15-minute expiry
+      const afterExpiry = check(db, base, I('f3', 'C', [{ itemId: 'lamp', qty: 1 }]), now + 16 * 60_000);
+      assert.equal(afterExpiry.status, 'pending_approval', 'the expired escalation released the lamp, so a fresh request can hold it again');
+      assert.equal(db.val(`SELECT status FROM actions WHERE id='f1'`), 'expired');
       assert.equal(verifyChain(db).ok, true);
     });
   });

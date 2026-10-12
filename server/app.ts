@@ -22,6 +22,10 @@ export interface AppOptions {
   rateLimitPerMin?: number;
   demoRunsPerMin?: number;
   fetchImpl?: typeof fetch; // tests
+  lockOperatorEndpoints?: boolean; // LEASH_LOCK_OPERATOR_ENDPOINTS=1: require the bearer token on /ledger and /exposure too.
+  // Off by default so the public demo's own transparency feature (anyone can watch the hash chain) keeps working unauthenticated.
+  // /approval/:id and POST /approve stay public regardless: that flow is designed for a human clicking an emailed link with no login,
+  // and its secret is the per-action token, not a service-wide bearer.
 }
 
 export function createApp(d: GateDeps, o: AppOptions = {}): express.Express {
@@ -37,6 +41,13 @@ export function createApp(d: GateDeps, o: AppOptions = {}): express.Express {
   // hook endpoints: bearer token; FAIL CLOSED (503) if unset in production
   api.use(['/check', '/result'], (req: Request, res: Response, next: NextFunction) => {
     if (!o.token) return o.production ? void res.status(503).json({ error: 'hook endpoints disabled: LEASH_TOKEN not set' }) : next();
+    eq(req.get('authorization') ?? '', `Bearer ${o.token}`) ? next() : void res.status(401).json({ error: 'unauthorized' });
+  });
+  // operator-facing read endpoints (full ledger, spend exposure): public by default for the demo's own transparency feature;
+  // an operator running this beyond the demo can require the same bearer token here (LEASH_LOCK_OPERATOR_ENDPOINTS=1).
+  api.use(['/ledger', '/exposure'], (req: Request, res: Response, next: NextFunction) => {
+    if (!o.lockOperatorEndpoints) return next();
+    if (!o.token) return void res.status(503).json({ error: 'operator endpoints locked: LEASH_TOKEN not set' });
     eq(req.get('authorization') ?? '', `Bearer ${o.token}`) ? next() : void res.status(401).json({ error: 'unauthorized' });
   });
 

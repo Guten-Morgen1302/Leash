@@ -53,7 +53,16 @@ export function check(db: Db, m: Mandate, a: CheckInput, now = Date.now(), ext?:
         return finish(db, a, now, { status: 'blocked', ruleId: 'R-ITEMS-UNKNOWN', reason: 'No order data is known for that payment, so items cannot be priced.' }, 0, undefined, undefined, m);
       }
       orderId = order.order_id;
-      const rows = db.all<ItemRow>('SELECT item_id, name, unit_cents, qty, refunded_qty, reserved_qty, refundable, flag FROM order_items WHERE order_id=?', orderId);
+      // reserved_qty here also counts units already tied up in a PENDING approval for this order (not just 'reserved' actions),
+      // so two concurrent requests for the same unit cannot both escalate (F1): the second sees it as unavailable.
+      const rows = db.all<ItemRow>(
+        `SELECT oi.item_id, oi.name, oi.unit_cents, oi.qty, oi.refunded_qty,
+                oi.reserved_qty + COALESCE((SELECT SUM(ai.qty) FROM action_items ai JOIN actions a ON a.id = ai.action_id
+                                             WHERE ai.order_id = oi.order_id AND ai.item_id = oi.item_id AND a.status = 'pending_approval'), 0) AS reserved_qty,
+                oi.refundable, oi.flag
+         FROM order_items oi WHERE oi.order_id=?`,
+        orderId,
+      );
       const res = resolveItems(rows, a.items);
       if (!res.ok) return finish(db, a, now, res.decision, 0, undefined, undefined, m);
       amountCents = res.cents;
@@ -136,6 +145,15 @@ export function sweep(db: Db, now = Date.now()): void {
     for (const r of db.all<{ id: string }>(`SELECT id FROM actions WHERE status='reserved' AND updated_at < ?`, now - 120_000)) {
       db.run(`UPDATE actions SET status='unknown_outcome', updated_at=? WHERE id=?`, now, r.id);
       ledger(db, r.id, 'unknown_outcome', { reason: 'no result within 120s' }, now);
+    }
+    // an approval nobody ever clicked frees the items it held (F1): the pending-qty subquery in check() only counts status='pending_approval'
+    for (const r of db.all<{ id: string }>(
+      `SELECT a.id FROM actions a JOIN approvals ap ON ap.action_id = a.id WHERE a.status='pending_approval' AND ap.status='pending' AND ap.expires_at < ?`,
+      now,
+    )) {
+      db.run(`UPDATE approvals SET status='expired' WHERE action_id=?`, r.id);
+      db.run(`UPDATE actions SET status='expired', updated_at=? WHERE id=?`, now, r.id);
+      ledger(db, r.id, 'expired', { reason: 'approval window elapsed unattended' }, now);
     }
   });
 }

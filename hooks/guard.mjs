@@ -2,9 +2,21 @@
 // Bypass guard hook (best effort). Matches Bash, Write, Edit, MultiEdit, NotebookEdit, Read. Exit 2 blocks; every failure path blocks.
 const PAYPAL_CALL = /(api-m|api)(\.sandbox)?\.paypal\.com|mcp(\.sandbox)?\.paypal\.com|PAYPAL_(SANDBOX_)?ACCESS_TOKEN|PAYPAL_CLIENT_SECRET|PAYPAL_ACCESS_TOKEN/i;
 const PROTECTED_PATH = /(^|[\\/])\.claude[\\/](settings(\.local)?\.json|hooks)|leash-hook|guard\.mjs|(^|[\\/])mandate\.json$|(^|[\\/])\.env(\.|$)|[\\/]\.seed[\\/]/i;
+// Best-effort obfuscation coverage (still bypassable in principle: THREAT-MODEL T2). Catches the cheap, common evasions:
+// quotes/string-concatenation used to break up "paypal.com" or the env var names, and base64-encoded hosts/tokens.
+const deobfuscate = (c) => {
+  const forms = [c, c.replace(/['"`]/g, '').replace(/\s*\+\s*/g, '').replace(/\$\{?(\w+)\}?/g, '$1')];
+  for (const tok of c.match(/[A-Za-z0-9+/]{12,}={0,2}/g) ?? []) {
+    try { forms.push(Buffer.from(tok, 'base64').toString('utf8')); } catch { /* not valid base64, ignore */ }
+  }
+  return forms;
+};
 export const classify = (ev) => {
   const t = String(ev.tool_name ?? ''), i = ev.tool_input ?? {};
-  if (t === 'Bash' || t === 'PowerShell') { const c = String(i.command ?? ''); if (PAYPAL_CALL.test(c)) return 'Direct PayPal API/token use from a shell bypasses Leash. Use the PayPal MCP tools so the mandate applies.'; }
+  if (t === 'Bash' || t === 'PowerShell') {
+    const c = String(i.command ?? '');
+    if (deobfuscate(c).some((f) => PAYPAL_CALL.test(f))) return 'Direct PayPal API/token use from a shell bypasses Leash. Use the PayPal MCP tools so the mandate applies.';
+  }
   if (/^(Write|Edit|MultiEdit|NotebookEdit|Read)$/.test(t)) { const p = String(i.file_path ?? i.notebook_path ?? ''); if (PROTECTED_PATH.test(p)) return `Leash protects ${p} (hook config, mandate, secrets). Ask the operator to change it.`; }
   return null;
 };

@@ -24,7 +24,11 @@ if (mode === 'post' || mode === 'failure') {                                  //
   process.exit(0);
 }
 if (process.env.LEASH_TEST_CRASH) throw new Error('simulated crash');
-if (/^(get|list|show|search)_/.test(tool)) allow('read-only');
+// Explicit allowlist, not a name-pattern heuristic: a tool must be VERIFIED read-only (docs/reviews/mcp-tool-payloads.md), not just
+// shaped like one. A future or unenumerated PayPal tool that happens to start with get/list/show/search is NOT trusted by name alone;
+// it falls through to the block below (fail closed by omission), same policy the MCP proxy already applies to unmapped tools.
+const VERIFIED_READ_ONLY = new Set(['get_refund', 'list_disputes', 'get_dispute', 'list_transactions']);
+if (VERIFIED_READ_ONLY.has(tool)) allow('read-only (verified)');
 if (tool !== 'create_refund' && tool !== 'refund_items') block(`Tool "${tool}" has no mandate rule (fail closed).`);
 const i = ev.tool_input ?? {};
 const items = tool === 'refund_items' ? (Array.isArray(i.items) ? i.items.map((x) => ({ itemId: String(x.item_id ?? x.itemId), qty: Number(x.qty ?? 1) })) : null) : undefined;

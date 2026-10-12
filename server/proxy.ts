@@ -1,12 +1,19 @@
 // Leash credential-holding MCP proxy. It is the ONLY holder of the PayPal token; the agent sees only these tools.
 // Primary interface is ITEM-SCOPED: the agent names line items and Leash computes the amount from trusted order data.
 // Unmapped PayPal tools (invoices, disputes, subscriptions...) simply do not exist here: fail closed by omission.
+import { randomUUID } from 'node:crypto';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 import { runRefund, type GateDeps, type GateOutcome } from './gate.ts';
 import { toCents } from './paypal.ts';
 
 const reply = (obj: object, isError = false) => ({ content: [{ type: 'text' as const, text: JSON.stringify(obj) }], isError });
+
+// StdioServerTransport never sets extra.sessionId (confirmed against @modelcontextprotocol/sdk server/stdio.js): a stdio proxy
+// is a single process per agent connection, so a stable per-PROCESS id (not a shared literal) is the right fallback. This keeps
+// approval grants (keyed by args_hash + session_id) from being consumable across two different proxy processes that happen to
+// share one leash.db and coincidentally request the same capture/amount/items.
+const FALLBACK_SESSION_ID = `proxy-${randomUUID()}`;
 
 const present = (o: GateOutcome) => {
   switch (o.status) {
@@ -26,7 +33,7 @@ export interface ProxyOptions {
 
 export function createProxy(d: GateDeps, o: ProxyOptions = {}): McpServer {
   const server = new McpServer({ name: 'leash-paypal', version: '0.1.0' });
-  const sessionOf = (extra: any) => String(extra?.sessionId ?? 'proxy');
+  const sessionOf = (extra: any) => String(extra?.sessionId ?? FALLBACK_SESSION_ID);
 
   server.tool('get_order', 'Get the refundable line items of the order paid by a PayPal capture (trusted merchant data). Always call this before refund_items.',
     { capture_id: z.string().min(3).max(64) },
