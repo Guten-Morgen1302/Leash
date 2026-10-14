@@ -30,6 +30,18 @@ Real-agent footage (same injected ticket, a real Claude agent, with and without 
 1. **Credential-holding MCP proxy** (`server/proxy-main.ts`): tools `get_order`, `refund_items`, `get_refund`. The agent can name items, never amounts. Launch it from somewhere the agent cannot read; a token in an agent-readable settings file is not custody.
 2. **Claude Code hooks** (`hooks/`): gate PayPal's own MCP tool. Only exit code 2 blocks in Claude Code, so every failure path exits 2. Run `npm run doctor` to check your setup. See [docs/CLAUDE-CODE.md](docs/CLAUDE-CODE.md).
 
+## Built with PayPal and AI (what each tool does here)
+
+| Tool | Role in Leash |
+|---|---|
+| PayPal REST API, sandbox (OAuth token, Payments v2 refunds and captures, Disputes list) | The money path. `server/paypal.ts` creates refunds idempotently (`PayPal-Request-Id` = action id), reads the capture time and any open dispute before deciding, and re-reads refunds for `/proof`. Orders v2 with a test card (`scripts/seed.mjs`) created the sandbox captures. Sandbox only: the client refuses any other host. |
+| PayPal AI Toolkit / MCP server (hosted `mcp.sandbox.paypal.com` and the local `@paypal/mcp`) | The Claude Code hook gates PayPal's own `create_refund` tool. We ran it against the real toolkit plugin and re-tested the hosted server's `create_refund` (a $1.00 sandbox refund returned COMPLETED). |
+| Claude (Anthropic) models and Claude Code | The agent under test (Haiku 4.5 and Sonnet 5.5 in the benchmark and `npm run demo:agent`) and the harness whose hooks Leash uses. Claude Code was also used to build the project. |
+| Google Gemini (`GEMINI_API_KEY`, optional) | Two advisory jobs: the one-paragraph summary on the approval page, and the policy compiler that drafts a mandate from plain English. Neither moves money: the gate is deterministic code and never reads a model's output. |
+| AG Grid Community 36.2.0 (sponsor) | The ledger grid on `/ledger`. |
+
+Other tools: React, Vite, Express, SQLite (better-sqlite3 and node:sqlite), the Model Context Protocol SDK, Playwright, Remotion (video). No other sponsor integrations. A `render.yaml` is included but we did not deploy.
+
 ## Policy is data
 
 Limits live in [mandate.json](mandate.json), rendered in plain language at `/mandate`. A missing or null limit makes the mandate invalid: Leash does not guess. Rules are listed in [docs/policy.md](docs/policy.md).
