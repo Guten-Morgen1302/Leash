@@ -1,0 +1,22 @@
+{
+  "name": "leash-video",
+  "version": "1.0.0",
+  "description": "Leash demo video (Remotion)",
+  "scripts": {
+    "studio": "remotion studio src/index.ts",
+    "render": "remotion render src/index.ts Main out/leash-silent.mp4 --codec=h264 --crf=16",
+    "thumbnail": "remotion still src/index.ts Thumbnail out/thumbnail.png"
+  },
+  "license": "MIT",
+  "type": "commonjs",
+  "dependencies": {
+    "@remotion/cli": "^4.0.530",
+    "@remotion/google-fonts": "^4.0.530",
+    "@types/react": "^18.3.31",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "remotion": "^4.0.530",
+    "typescript": "^5.9.3"
+  },
+  "private": true
+}

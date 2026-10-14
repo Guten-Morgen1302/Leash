@@ -31,3 +31,12 @@ paypal video transcript.txt
 .bench/
 .node-runtime/
 .demo-agent/
+
+# raw demo-video screen recordings (large, not source)
+/recording/
+
+# demo video: build output, cut clips, python venv (sources stay in git)
+video/out/
+video/public/clips/
+video/.venv/
+__pycache__/

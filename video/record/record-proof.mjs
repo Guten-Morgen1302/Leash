@@ -1,0 +1,25 @@
+// Separate take on the LIVE-FIRE server (sandbox credentials): /proof re-reads each recorded refund from PayPal (GET only).
+import { chromium } from 'playwright-core';
+import { CHROME, CURSOR_JS, Recorder, glide, sleep } from './lib.mjs';
+const [B, OUT] = process.argv.slice(2);
+const browser = await chromium.launch({ executablePath: CHROME, headless: true, args: ['--hide-scrollbars'] });
+const ctx = await browser.newContext({ viewport: { width: 1280, height: 720 }, deviceScaleFactor: 1.5, colorScheme: 'light' });
+await ctx.addInitScript(CURSOR_JS);
+const d = await ctx.newPage();
+await d.goto(`${B}/mandate`); await d.waitForLoadState('networkidle'); await sleep(800);
+const rec = new Recorder(d, 'proof', OUT, { w: 1920, h: 1080 });
+await rec.start();
+await d.mouse.move(800, 450); d.__m = { x: 800, y: 450 };
+await sleep(800);
+rec.mark('nav: Proof (LIVE-FIRE server)');
+await glide(d, d.getByRole('link', { name: 'Proof', exact: true }));
+await d.locator('tbody tr').first().waitFor({ timeout: 30000 }); await sleep(600);
+rec.mark('proof: 3 sandbox refunds, "PayPal now" column re-read live');
+await glide(d, d.locator('tbody tr').first().locator('td').last(), { click: false, ms: 900 });
+await sleep(2500);
+await glide(d, d.locator('tbody tr').nth(1).locator('td').nth(2), { click: false, ms: 900 });
+await sleep(3500);
+rec.mark('end');
+await rec.stop();
+console.log(await d.locator('main').innerText());
+await browser.close();
