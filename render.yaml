@@ -4,10 +4,13 @@ services:
     name: leash
     runtime: node
     plan: free
-    buildCommand: npm ci && npm run web:build
+    # NODE_ENV=production makes npm skip devDependencies, and the UI build needs vite: install them explicitly
+    buildCommand: npm ci --include=dev && npm run web:build
     startCommand: node --disable-warning=ExperimentalWarning server/index.ts
     healthCheckPath: /health
     envVars:
+      - key: NODE_VERSION
+        value: "24"
       - key: NODE_ENV
         value: production
       - key: LEASH_TRUST_PROXY
