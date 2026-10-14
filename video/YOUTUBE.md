@@ -20,9 +20,9 @@ Chapters
 1:45 Results and how to run it
 
 Run it yourself (no keys needed):
-git clone https://github.com/Guten-Morgen1302/paypal-hackathon-devpost
+git clone https://github.com/Guten-Morgen1302/Leash
 npm ci && npm run demo
 
-Code: https://github.com/Guten-Morgen1302/paypal-hackathon-devpost (MIT)
+Code: https://github.com/Guten-Morgen1302/Leash (MIT)
 Benchmarks and their limits: docs/IMPACT.md · What Leash does not protect against: docs/THREAT-MODEL.md
 Benchmarks are small and use tickets we wrote.

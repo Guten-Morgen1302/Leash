@@ -7,7 +7,7 @@ Leash is a deterministic mandate gate for AI agents that move money through PayP
 ## Run it (3 steps, no keys needed)
 
 ```bash
-git clone https://github.com/Guten-Morgen1302/paypal-hackathon-devpost.git && cd paypal-hackathon-devpost
+git clone https://github.com/Guten-Morgen1302/Leash.git && cd Leash
 npm ci
 npm run demo        # builds the UI and serves http://127.0.0.1:4317 (picks the next free port if busy)
 ```

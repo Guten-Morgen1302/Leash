@@ -234,7 +234,7 @@ export const End: React.FC = () => {
           </div>
         </Pop>
         <Pop at={2.5}>
-          <div style={{ fontFamily: mono, fontSize: 32, color: C.violetSoft, marginTop: 22 }}>github.com/Guten-Morgen1302/paypal-hackathon-devpost</div>
+          <div style={{ fontFamily: mono, fontSize: 32, color: C.violetSoft, marginTop: 22 }}>github.com/Guten-Morgen1302/Leash</div>
         </Pop>
         <Pop at={3.0}>
           <div style={{ display: "flex", gap: 14, marginTop: 26 }}>
