@@ -166,7 +166,7 @@ For the complete guide, start at the [documentation index](docs/DOCUMENTATION_IN
 
 ![Contributors](docs/assets/brand/divider-contributors.svg)
 
-<table>
+<table align="center">
   <tr>
     <td align="center" width="50%">
       <a href="https://github.com/Guten-Morgen1302">
