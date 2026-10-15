@@ -192,7 +192,9 @@ For the complete guide, start at the [documentation index](docs/DOCUMENTATION_IN
         <strong>Aayush</strong>
       </a>
       <br /><sub>Product video and media production</sub><br /><br />
-      <a href="https://github.com/Aashu-11"><img src="https://img.shields.io/badge/GitHub-Aashu-11-181717?style=for-the-badge&logo=github" alt="Aayush on GitHub" /></a>
+<a href="https://github.com/Aashu-11">
+  <img src="https://img.shields.io/badge/GitHub-Aashu--11-181717?style=for-the-badge&logo=github" alt="Aayush on GitHub" />
+</a>
     </td>
     <td align="center" width="50%">
       <a href="https://github.com/devikabongarde">
