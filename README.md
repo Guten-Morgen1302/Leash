@@ -27,7 +27,7 @@ Leash is a deterministic mandate gate for AI agents that move money through PayP
     <img src="docs/assets/leash-demo.gif" alt="Leash blocks a prompt-injected whole-order refund" width="800" />
   </a>
   <br />
-  <strong><a href="video/leash-product-demo.mp4">Watch the complete 2:03 product video</a></strong>
+  <strong><a href="https://youtu.be/rbKJmVQOJqw">Watch the complete 2:03 product video</a></strong>
 </div>
 
 ### Product walkthrough
