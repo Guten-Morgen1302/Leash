@@ -1,5 +1,5 @@
 // The policy engine: a PURE function. Limits are data (Mandate), state is passed in, nothing here does I/O.
-// Rule order is the contract in docs/policy.md. Hard rules (blocks) are re-checked even after human approval;
+// Rule order is the contract in docs/Backend/POLICY_REFERENCE.md. Hard rules (blocks) are re-checked even after human approval;
 // approval waives only the soft rules (daily cap, action cap, state-unavailable).
 import type { Decision, ExternalState, Mandate, PayRow } from './types.ts';
 

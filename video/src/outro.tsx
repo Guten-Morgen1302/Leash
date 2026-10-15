@@ -17,7 +17,7 @@ const RULES = [
   "return window", "HARD MAX", "hard daily cap", "approval grant", "stale state", "daily cap", "action cap",
 ];
 
-/** How it works: one request, left to right. Server code paths from docs/ARCHITECTURE.md. */
+/** How it works: one request, left to right. Server code paths from docs/Architecture/SYSTEM_ARCHITECTURE.md. */
 export const HowItWorks: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
@@ -206,7 +206,7 @@ export const Stats: React.FC = () => {
         ))}
       </div>
       <div style={{ position: "absolute", left: 96, bottom: 52, fontFamily: mono, fontSize: 16, color: C.dim }}>
-        Small benchmarks, tickets we wrote · details and limits in docs/IMPACT.md and docs/THREAT-MODEL.md
+        Small benchmarks, tickets we wrote · details and limits in docs/Product/IMPACT_AND_EVIDENCE.md and docs/Architecture/THREAT_MODEL.md
       </div>
       <AnimLabel>Numbers from the repo</AnimLabel>
     </AbsoluteFill>

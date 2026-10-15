@@ -124,21 +124,21 @@ export function createApp(d: GateDeps, o: AppOptions = {}): express.Express {
     ];
   };
   const author = express.Router();
-  author.get('/samples', (_q, res) => res.json({ samples: SAMPLES.map((n) => ({ id: n, policy: readFileSync(`docs/evidence/policy-${n}.txt`, 'utf8') })), live: !!process.env.GEMINI_API_KEY }));
+  author.get('/samples', (_q, res) => res.json({ samples: SAMPLES.map((n) => ({ id: n, policy: readFileSync(`server/fixtures/demo/policy-${n}.txt`, 'utf8') })), live: !!process.env.GEMINI_API_KEY }));
   author.post('/compile', rateLimit(5), async (req, res) => {
     const policy = typeof req.body?.policy === 'string' ? req.body.policy.slice(0, 4000) : '';
     const sample = typeof req.body?.sample === 'string' ? req.body.sample : '';
     if (!policy.trim() && !SAMPLES.includes(sample)) return void res.status(400).json({ error: 'invalid_input', fix: 'Send the policy text.' });
     let draft; let source = 'live';
     if (process.env.GEMINI_API_KEY && policy.trim()) draft = await compilePolicy(policy, (p) => (o.askImpl ?? askGemini)(p));
-    else if (SAMPLES.includes(sample)) { draft = JSON.parse(readFileSync(`docs/evidence/compile-${sample}.json`, 'utf8')); source = 'recorded'; }
+    else if (SAMPLES.includes(sample)) { draft = JSON.parse(readFileSync(`server/fixtures/demo/compile-${sample}.json`, 'utf8')); source = 'recorded'; }
     else return void res.status(503).json({ error: 'no_model', fix: 'Compiling your own text needs GEMINI_API_KEY on the server. Pick one of the sample policies to see a recorded compile.' });
     res.json({ source, runs: draft.runs, disagreements: draft.disagreements, fields: draft.fields, playback: playback(draft.fields), unsupported: draft.unsupported.slice(0, 40), questions: draft.questions.slice(0, 40), activatable: FIELDS.filter((k) => ['perActionCapCents', 'hardMaxCents', 'dailyCapCents', 'hardDailyCapCents'].includes(k)).every((k) => draft.fields[k] != null) });
   });
   api.use('/author', author);
   // recorded live-sandbox proof; re-read from PayPal when this server has sandbox credentials
   api.get('/proof', async (_req, res) => {
-    const rec = JSON.parse(readFileSync('docs/evidence/live-sandbox.json', 'utf8'));
+    const rec = JSON.parse(readFileSync('server/fixtures/demo/live-sandbox.json', 'utf8'));
     const refunds = await Promise.all(rec.refunds.map(async (r: any) => {
       if (!d.paypal) return { ...r, live: null };
       try { const g = await d.paypal.getRefund(r.refund_id); return { ...r, live: { status: g.status, amount: g.amount?.value } }; } catch { return { ...r, live: { status: 'unavailable' } }; }

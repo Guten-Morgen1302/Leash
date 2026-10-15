@@ -213,7 +213,7 @@ export const Problem: React.FC = () => {
           Prompts are not a <span style={{ color: C.violet }}>security boundary.</span>
         </Slam>
       </div>
-      <AnimLabel>Motion graphic · numbers from docs/IMPACT.md</AnimLabel>
+      <AnimLabel>Motion graphic · numbers from docs/Product/IMPACT_AND_EVIDENCE.md</AnimLabel>
     </AbsoluteFill>
   );
 };

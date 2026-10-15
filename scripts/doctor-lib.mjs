@@ -17,11 +17,11 @@ export function doctor({ settingsFiles, hookScript, guardScript, leashUrl, nodeB
   }
   const pre = hooks.filter((h) => h.ev === 'PreToolUse');
   const leash = pre.find((h) => hn.test(h.cmd) && /paypal/i.test(h.matcher));
-  add(!!leash, 'PreToolUse hook for the PayPal MCP tools is configured', 'Add the hook block from docs/CLAUDE-CODE.md to .claude/settings.json');
+  add(!!leash, 'PreToolUse hook for the PayPal MCP tools is configured', 'Add the hook block from docs/Backend/CLAUDE_CODE_INTEGRATION.md to .claude/settings.json');
   add(!!leash && /mcp__plugin_paypal_paypal-sandbox__|mcp__.*paypal/i.test(leash.matcher), 'Hook matcher covers the PayPal MCP tools', 'Use matcher mcp__plugin_paypal_paypal-sandbox__.* (confirm with your live tool list)');
   add(!!leash && /[A-Za-z]:[\\/]|["' ]\//.test(leash.cmd), 'Hook command uses an absolute path', 'A relative path breaks when the working directory changes and then fails OPEN');
   add(existsSync(hookScript), 'Hook script exists', `Missing ${hookScript}: Claude Code would proceed without any check (fails open)`);
-  add(pre.some((h) => gn.test(h.cmd)), 'Bypass guard hook (Bash/Write/Edit) is configured', 'Add the guard hook block from docs/CLAUDE-CODE.md');
+  add(pre.some((h) => gn.test(h.cmd)), 'Bypass guard hook (Bash/Write/Edit) is configured', 'Add the guard hook block from docs/Backend/CLAUDE_CODE_INTEGRATION.md');
   const sample = spawnSync(nodeBin, [hookScript], {
     input: JSON.stringify({ session_id: 'doctor', tool_name: 'mcp__plugin_paypal_paypal-sandbox__create_refund', tool_use_id: `doctor_${Date.now()}`, tool_input: { capture_id: 'DOCTOR-UNKNOWN', amount: { currency_code: 'USD', value: '900000.00' } } }),
     env: { ...process.env, LEASH_URL: leashUrl }, timeout: 8000,

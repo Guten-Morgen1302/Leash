@@ -32,6 +32,11 @@ paypal video transcript.txt
 .node-runtime/
 .demo-agent/
 
+# generated benchmark outputs (harnesses and input fixtures remain tracked)
+/scripts/leashbench/bench/
+/scripts/leashbench/results-*.json
+/scripts/leashbench/user-policies-results.json
+
 # raw demo-video screen recordings (large, not source)
 /recording/
 

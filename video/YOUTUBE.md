@@ -24,5 +24,5 @@ git clone https://github.com/Guten-Morgen1302/Leash
 npm ci && npm run demo
 
 Code: https://github.com/Guten-Morgen1302/Leash (MIT)
-Benchmarks and their limits: docs/IMPACT.md · What Leash does not protect against: docs/THREAT-MODEL.md
+Benchmarks and their limits: docs/Product/IMPACT_AND_EVIDENCE.md · What Leash does not protect against: docs/Architecture/THREAT_MODEL.md
 Benchmarks are small and use tickets we wrote.

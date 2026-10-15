@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="420" viewBox="0 0 1280 420" role="img" aria-labelledby="title desc">
+  <title id="title">Leash</title>
+  <desc id="desc">Give your AI agent a refund budget, not your PayPal keys.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#090a12"/>
+      <stop offset="1" stop-color="#11102a"/>
+    </linearGradient>
+    <linearGradient id="violet" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#9b8cff"/>
+      <stop offset="1" stop-color="#6847ef"/>
+    </linearGradient>
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="28"/>
+    </filter>
+  </defs>
+  <rect width="1280" height="420" rx="22" fill="url(#bg)"/>
+  <circle cx="1050" cy="90" r="170" fill="#6c46f4" opacity=".18" filter="url(#glow)"/>
+  <circle cx="1120" cy="355" r="150" fill="#2ddf9b" opacity=".08" filter="url(#glow)"/>
+  <g transform="translate(90 82)">
+    <path d="M0 42C0 19 19 0 42 0h115c23 0 42 19 42 42v69h50c23 0 42 19 42 42s-19 42-42 42H94c-52 0-94-42-94-94V42Zm62 20v39c0 18 14 32 32 32h43v-71H62Z" fill="url(#violet)"/>
+    <circle cx="235" cy="153" r="23" fill="#101126"/>
+  </g>
+  <text x="430" y="147" fill="#ffffff" font-family="Arial, Helvetica, sans-serif" font-size="84" font-weight="700" letter-spacing="-3">Leash</text>
+  <text x="433" y="205" fill="#a99cff" font-family="Arial, Helvetica, sans-serif" font-size="25" font-weight="700" letter-spacing="3">AUTHOR · AUTHORIZE · VERIFY</text>
+  <text x="433" y="266" fill="#f5f5f8" font-family="Arial, Helvetica, sans-serif" font-size="29" font-weight="600">A refund budget for AI agents.</text>
+  <text x="433" y="308" fill="#a9acbc" font-family="Arial, Helvetica, sans-serif" font-size="22">Item-scoped PayPal refunds · human approvals · hash-chained audit trail</text>
+  <g transform="translate(433 344)" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700">
+    <rect width="178" height="38" rx="19" fill="#201c42" stroke="#8170ff"/>
+    <text x="89" y="25" text-anchor="middle" fill="#ddd8ff">PAYPAL SANDBOX</text>
+    <rect x="192" width="174" height="38" rx="19" fill="#132d28" stroke="#2ddf9b"/>
+    <text x="279" y="25" text-anchor="middle" fill="#a9f5d5">DETERMINISTIC GATE</text>
+  </g>
+</svg>

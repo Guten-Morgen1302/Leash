@@ -21,7 +21,7 @@ const NEXT_BLOCKED = 'Nothing was refunded. Do not retry the same request. If th
 const present = (o: GateOutcome) => {
   switch (o.status) {
     case 'executed': return reply({ status: 'executed', refund_id: o.refundId, amount: (o.amountCents / 100).toFixed(2), rule_id: o.ruleId, action_id: o.actionId, mode: o.mode });
-    case 'blocked': return reply({ status: 'blocked', rule_id: o.ruleId, reason: o.reason, action_id: o.actionId, doc_url: `docs/policy.md#${o.ruleId.toLowerCase()}`, next: NEXT_BLOCKED }, true);
+    case 'blocked': return reply({ status: 'blocked', rule_id: o.ruleId, reason: o.reason, action_id: o.actionId, doc_url: `docs/Backend/POLICY_REFERENCE.md#${o.ruleId.toLowerCase()}`, next: NEXT_BLOCKED }, true);
     case 'pending_approval': return reply({ status: 'pending_approval', rule_id: o.ruleId, reason: o.reason, approval_url: o.approvalUrl, next: 'A human must approve at the link, then call the same tool again with the same arguments.' }, true);
     case 'execution_failed': return reply({ status: 'execution_failed', reason: o.reason, ...(o.debugId ? { paypal_debug_id: o.debugId } : {}), action_id: o.actionId }, true);
     case 'unknown_outcome': return reply({ status: 'unknown_outcome', reason: o.reason, action_id: o.actionId }, true);
@@ -31,7 +31,7 @@ const present = (o: GateOutcome) => {
 };
 
 export interface ProxyOptions {
-  exposeAmountTool?: boolean; // create_refund(amount): the weaker interface, off by default (see docs/IMPACT.md section 13)
+  exposeAmountTool?: boolean; // create_refund(amount): the weaker interface, off by default (see docs/Product/IMPACT_AND_EVIDENCE.md section 13)
 }
 
 export function createProxy(d: GateDeps, o: ProxyOptions = {}): McpServer {

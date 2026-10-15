@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="120" viewBox="0 0 1280 120" role="img" aria-label="How Leash works">
+  <rect width="1280" height="120" fill="#0b0d14"/>
+  <path d="M0 18H1280V83C1030 55 827 112 572 84C333 58 181 99 0 75Z" fill="#4f199f"/>
+  <path d="M0 18H1280V49C1014 31 825 72 571 55C324 38 170 67 0 54Z" fill="#762ce0" opacity=".72"/>
+  <text x="640" y="79" text-anchor="middle" fill="#fff" font-family="Arial, Helvetica, sans-serif" font-size="36" font-weight="700">How Leash works</text>
+</svg>

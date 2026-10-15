@@ -1,4 +1,4 @@
-// Hash-chained audit trail. TAMPER-EVIDENT against partial edits only (see docs/THREAT-MODEL.md); seal.ts adds the out-of-DB checkpoint.
+// Hash-chained audit trail. TAMPER-EVIDENT against partial edits only (see docs/Architecture/THREAT_MODEL.md); seal.ts adds the out-of-DB checkpoint.
 import { createHash } from 'node:crypto';
 import type { Db } from './db.ts';
 

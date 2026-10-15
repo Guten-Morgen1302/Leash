@@ -48,7 +48,7 @@ script takes one request per line, so a full run needs the quota for 16 lines (o
 - `/proof` was recorded on a separate server with sandbox keys: the "PayPal now" column was fetched live from PayPal while recording.
 - The Author scene shows the recorded sample compile (keyless server), and says so.
 - The phone scene is a phone-width browser (390×844), and says so.
-- Numbers come from today's test run (103/103) and docs/IMPACT.md (benchmarks, with n on screen).
+- Numbers come from today's test run (103/103) and docs/Product/IMPACT_AND_EVIDENCE.md (benchmarks, with n on screen).
 - No PayPal logo or other third-party branding.
 
 ## Scenes

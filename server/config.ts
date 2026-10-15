@@ -1,4 +1,4 @@
-// Mandate loading. Limits are DATA (docs/IMPACT.md "policy is data"). A null or missing required field makes the mandate INVALID:
+// Mandate loading. Limits are DATA (docs/Product/IMPACT_AND_EVIDENCE.md "policy is data"). A null or missing required field makes the mandate INVALID:
 // there are no silent defaults for an unclear field (decision D-V2-8).
 import { readFileSync } from 'node:fs';
 import type { Mandate } from './types.ts';
@@ -16,7 +16,7 @@ const KNOWN = new Set<string>([...REQUIRED_INT, 'schema_version', 'expiresAt', '
 export function parseMandate(raw: unknown): Mandate {
   if (!raw || typeof raw !== 'object') throw new MandateError('Mandate must be a JSON object.');
   const o = raw as Record<string, unknown>;
-  if (o.schema_version !== 1) throw new MandateError(`mandate.json schema_version ${String(o.schema_version)} is not supported; this build expects 1. See docs/policy.md.`);
+  if (o.schema_version !== 1) throw new MandateError(`mandate.json schema_version ${String(o.schema_version)} is not supported; this build expects 1. See docs/Backend/POLICY_REFERENCE.md.`);
   for (const k of Object.keys(o)) if (!KNOWN.has(k)) throw new MandateError(`Unknown mandate field "${k}" (the schema is a fixed whitelist).`);
   for (const k of REQUIRED_INT) {
     const v = o[k];

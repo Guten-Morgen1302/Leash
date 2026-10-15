@@ -335,7 +335,7 @@ export const AuthorScene: React.FC = () => {
       kicker="08 · Policy compiler"
       title="A draft. Never a guess."
       hi={["guess."]}
-      note="Recorded compile (keyless server): 3 Gemini runs at temperature 0 · docs/evidence/compile-apparel.json"
+      note="Recorded compile (keyless server): 3 Gemini runs at temperature 0 · server/fixtures/demo/compile-apparel.json"
       callouts={[
         { from: settled, box: [146, 156, 676, 168], color: C.amber, label: "No limit in the text → NOT SET" },
         { from: settled + 0.7, box: [146, 394, 548, 192], label: "Listed, never dropped" },
