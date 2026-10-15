@@ -187,12 +187,12 @@ For the complete guide, start at the [documentation index](docs/DOCUMENTATION_IN
   </tr>
   <tr>
     <td align="center" width="50%">
-      <a href="https://github.com/aayushk1975">
-        <img src="https://github.com/aayushk1975.png?size=180" width="150" alt="Aayush's GitHub profile picture" /><br />
+      <a href="https://github.com/Aashu-11">
+        <img src="https://github.com/Aashu-11.png?size=180" width="150" alt="Aayush's GitHub profile picture" /><br />
         <strong>Aayush</strong>
       </a>
       <br /><sub>Product video and media production</sub><br /><br />
-      <a href="https://github.com/aayushk1975"><img src="https://img.shields.io/badge/GitHub-aayushk1975-181717?style=for-the-badge&logo=github" alt="Aayush on GitHub" /></a>
+      <a href="https://github.com/Aashu-11"><img src="https://img.shields.io/badge/GitHub-Aashu-11-181717?style=for-the-badge&logo=github" alt="Aayush on GitHub" /></a>
     </td>
     <td align="center" width="50%">
       <a href="https://github.com/devikabongarde">
